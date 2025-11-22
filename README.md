@@ -3,10 +3,10 @@ trying to write a movement script for matcha vm while trying to learn lua at the
 
 
 
-
+features to be inplemented:
 velocity indicator✅(trying to get colors working)
 
-velocity graph❌(if i could find a way)
+velocity graph❌
 
 eb ✅(could be better imo)
 
@@ -17,3 +17,8 @@ pixelsurf❌
 lj❌
 
 bhop❌(or speed velocity below 25✅)
+
+gui based off kamidere ❌
+
+fake headbounce ❌
+
