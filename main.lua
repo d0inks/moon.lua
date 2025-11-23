@@ -1,10 +1,10 @@
-
+--BHOP is not possible until i find a work around just use velocity--
+--havent done jb yet--
 local CFG = {
     EB = 0xA0; --left shift
-    ps = 0x05 --mb4
+    ps = 0x05--mb4
 }
 local edging = false
-local jbing = false
 local psing = false
 local bhop = true --set to false when doing gui - doink
 local playerS = game:GetService("Players")
@@ -32,6 +32,7 @@ PsTxt.Position = Vector2.new(980, 750)
 PsTxt.Text = "PS"
 PsTxt.Color = white
 PsTxt.Visible = false
+
 print("moon.lua by doink :)")
 print("discord server -- https://discord.gg/BxAWmtP7cp")
 --loop--
@@ -88,12 +89,12 @@ while true do
             psing = true
             PsTxt.Visible = true
             if absX < absZ then
-                for i=1,50 do
+                for i=1,40 do
                     hrp.AssemblyLinearVelocity = Vector3.new(0,0,vel.Z*1.5)
                     task.wait()
                 end
             elseif absX > absZ then
-                for i=1,50 do
+                for i=1,40 do
                     hrp.AssemblyLinearVelocity = Vector3.new(vel.X*1.5,0,0)
                     task.wait()
                 end
