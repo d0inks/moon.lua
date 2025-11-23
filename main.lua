@@ -1,4 +1,8 @@
 
+local CFG = {
+    EB = 0xA0; --left shift
+    ps = 0x05; --mb4
+}
 local edging = false
 local jbing = false
 local psing = false
