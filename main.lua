@@ -1,9 +1,4 @@
---BHOP(gaining speed) is not possible until i find a work around just use velocity--
---havent done jb yet--
-local CFG = {
-    EB = 0xA0; --left shift
-    ps = 0x05; --mb4
-}
+
 local edging = false
 local jbing = false
 local psing = false
