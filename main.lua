@@ -105,8 +105,6 @@ while true do
     else
         psing = false
         PsTxt.Visible = false
-        hrp.AssemblyLinearVelocity = Vector3.new(hrp.AssemblyLinearVelocity.X * 1, hrp.AssemblyLinearVelocity.Y * 1, hrp.AssemblyLinearVelocity.Z * 1)
-        --pixel surf!--
         end
     velocity()
    wait(0.0001)
