@@ -8,13 +8,13 @@ trying to write a movement script for matcha vm while trying to learn lua at the
 
 features to be inplemented:
 
-velocity indicator✅(trying to get colors working)
+velocity indicator✅(colors slightly work
 
 velocity graph❌
 
 eb ✅(could be better imo)
 
-jb❌
+jb✅
 
 pixelsurf✅
 
@@ -24,7 +24,7 @@ bhop❌(or speed velocity below 25✅)
 
 gui ❌
 
-watermark like hyoko ❌
+watermark ✅
 
 fake headbounce ❌
 
