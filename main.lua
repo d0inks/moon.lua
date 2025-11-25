@@ -80,6 +80,7 @@ while true do
         if CFG.rainbow == true then
             h = (h + 0.005) % 1
             rtxt.Color = Color3.fromHSV(h, 1, 1)
+            task.wait()
         else
             rtxt.Color = CFG.cwatermark
         end
@@ -126,7 +127,7 @@ while true do
                         hrp.AssemblyLinearVelocity = Vector3.new(dir.X*1.5,dir.Y * 2, dir.Z*1.5)
                     end
                     wait(0.1)
-                    hrp.AssemblyLinearVelocity = Vector3.new(dir.X*2, 25, dir.Z*2)
+                    hrp.AssemblyLinearVelocity = Vector3.new(dir.X*2, 28, dir.Z*2)
                     JBTxt.Color = green
                     wait(0.2)
                     JBTxt.Color = white
@@ -167,8 +168,8 @@ while true do
         end
         wait(0.0001)
         pre = totalVel
-        if bhop and iskeypressed(0x20) then
-            keypress(0x20)
-            keyrelease(0x20)
-        end
+    if bhop and iskeypressed(0x20) then
+        keypress(0x20)
+        keyrelease(0x20) 
+    end
 end
