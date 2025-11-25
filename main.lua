@@ -56,7 +56,7 @@ elseif CFG.topright == true then
     outbox.Position = Vector2.new(1775,10)
 end
 --end of watermark
-local velo = Create("Text",{Visible = CFG.velocityind,Position = pos,Color = white,Outline = true})
+local velo = Create("Text",{Visible = CFG.velocityind,Position = pos,Color = white,Outline = false})
 local ebTxt = Create("Text",{Position = Vector2.new(960, 750),Text = "EB",Color = white,Visible = false,Outline = true})
 local JBTxt = Create("Text",{Position = Vector2.new(945, 750),Text = "JB",Color = white, Visible = false, Outline = true})
 local PsTxt = Create("Text",{Position = Vector2.new(980, 750),Text = "PS",Color = white,Visible = false,Outline = true})
@@ -67,116 +67,116 @@ local pre = 0
 local h = 0
 local t = 0
 while true do
-    local EBpressed = iskeypressed(CFG.EB)
-    local JBpressed = iskeypressed(CFG.JB)
-    local Pspressed = iskeypressed(CFG.ps)
-    if CFG.rainbow == true then
-        h = (h + 0.005) % 1
-    rtxt.Color = Color3.fromHSV(h, 1, 1)
+        local EBpressed = iskeypressed(CFG.EB)
+        local JBpressed = iskeypressed(CFG.JB)
+        local Pspressed = iskeypressed(CFG.ps)
+        if CFG.rainbow == true then
+            h = (h + 0.005) % 1
+            rtxt.Color = Color3.fromHSV(h, 1, 1)
         else
-        rtxt.Color = CFG.cwatermark
-    end
-    t = (t - 0.005) % 1 --uses same logic from h bc im lazy asf
-    outbox.Color = Color3.fromHSV(1,0,t)
-    task.wait()
-    if EBpressed then
-        if player and not GUIStates.edging then
-            local dir = hrp.AssemblyLinearVelocity
-            if math.abs(dir.X) > 1 and  math.abs(dir.Y) > 1 or math.abs(dir.Z) > 1 and  math.abs(dir.Y) > 1  then
-            ebTxt.Visible = true
-            GUIStates.edging = true
-            ebTxt.Color = green
-                for i=1,5 do
+            rtxt.Color = CFG.cwatermark
+        end
+        t = (t - 0.005) % 1 --uses same logic from h bc im lazy asf
+        outbox.Color = Color3.fromHSV(1,0,t)
+        task.wait()
+        if EBpressed then
+            if player and not GUIStates.edging then
+                local dir = hrp.AssemblyLinearVelocity
+                if math.abs(dir.X) > 1 and  math.abs(dir.Y) > 1 or math.abs(dir.Z) > 1 and  math.abs(dir.Y) > 1  then
+                    ebTxt.Visible = true
+                    GUIStates.edging = true
+                    ebTxt.Color = green
+                    for i=1,5 do
+                        wait()
+                        hrp.AssemblyLinearVelocity = Vector3.new(dir.X * 1.2, dir.Y * 0, dir.Z * 1.2) - Vector3.new(0,20,0)
+                    end
                     wait()
-                    hrp.AssemblyLinearVelocity = Vector3.new(dir.X * 1.2, dir.Y * 0, dir.Z * 1.2) - Vector3.new(0,18,0)
+                    hrp.AssemblyLinearVelocity = Vector3.new(hrp.AssemblyLinearVelocity.X * 1.8, hrp.AssemblyLinearVelocity.Y * 1, hrp.AssemblyLinearVelocity.Z * 2)
+                    spawn(function()
+                        wait(0.2)
+                        GUIStates.edging = false
+                        ebTxt.Visible = false
+                        ebTxt.Color = white
+                    end)
                 end
-                wait()
-                hrp.AssemblyLinearVelocity = Vector3.new(hrp.AssemblyLinearVelocity.X * 1.8, hrp.AssemblyLinearVelocity.Y * 1, hrp.AssemblyLinearVelocity.Z * 2)
-                spawn(function()
+            end
+        else
+            GUIStates.edging = false
+            ebTxt.Visible = false
+            ebTxt.Color = white
+        end
+        if JBpressed then
+            if player and not GUIStates.jbing then
+                local dir = hrp.AssemblyLinearVelocity
+                if math.abs(dir.X) > 1 or math.abs(dir.Z) > 1 then
+                    JBTxt.Visible = true
+                    GUIStates.jbing = true
+                    if dir.Y > 1 then
+                        hrp.AssemblyLinearVelocity = Vector3.new(dir.X*1.5,dir.Y * -1.5, dir.Z*1.5)
+                    else
+                        hrp.AssemblyLinearVelocity = Vector3.new(dir.X*1.5,dir.Y * 2, dir.Z*1.5)
+                    end
+                    wait(0.1)
+                    hrp.AssemblyLinearVelocity = Vector3.new(dir.X*2, 25, dir.Z*2)
+                    JBTxt.Color = green
                     wait(0.2)
-                    GUIStates.edging = false
-                    ebTxt.Visible = false
-                    ebTxt.Color = white
-                end)
-            end
-        end
-    else
-        GUIStates.edging = false
-        ebTxt.Visible = false
-        ebTxt.Color = white
-    end
-    if JBpressed then
-        if player and not GUIStates.jbing then
-            local dir = hrp.AssemblyLinearVelocity
-            if math.abs(dir.X) > 1 or math.abs(dir.Z) > 1 then
-                JBTxt.Visible = true
-                GUIStates.jbing = true
-                if dir.Y > 1 then
-                    hrp.AssemblyLinearVelocity = Vector3.new(dir.X*1.5,dir.Y * -1.5, dir.Z*1.5)
-                else
-                    hrp.AssemblyLinearVelocity = Vector3.new(dir.X*1.5,dir.Y * 2, dir.Z*1.5)
+                    JBTxt.Color = white
                 end
-                wait(0.1)
-                hrp.AssemblyLinearVelocity = Vector3.new(dir.X*2, 60, dir.Z*2)
-                JBTxt.Color = green
-                wait(0.2)
-                JBTxt.Color = white
             end
+        else
+            GUIStates.jbing = false
+            JBTxt.Color = white
+            JBTxt.Visible = false
         end
-    else
-        GUIStates.jbing = false
-        JBTxt.Color = white
-        JBTxt.Visible = false
-    end
-    if Pspressed then
-        if player and not GUIStates.psing then
-            local dir = hrp.AssemblyLinearVelocity
-            if math.abs(dir.X) > 1  or math.abs(dir.Z) > 1 then
-                local absX = math.abs(dir.X)
-                local absZ = math.abs(dir.Z)
-                GUIStates.psing = true
-                PsTxt.Visible = true
-                PsTxt.Color = green
-                if absX < absZ then
-                    for i=1,40 do
-                        hrp.AssemblyLinearVelocity = Vector3.new(0,0,dir.Z*1.5)
-                        task.wait()
+        if Pspressed then
+            if player and not GUIStates.psing then
+                local dir = hrp.AssemblyLinearVelocity
+                if math.abs(dir.X) > 1  or math.abs(dir.Z) > 1 then
+                    local absX = math.abs(dir.X)
+                    local absZ = math.abs(dir.Z)
+                    GUIStates.psing = true
+                    PsTxt.Visible = true
+                    PsTxt.Color = green
+                    if absX < absZ then
+                        for i=1,40 do
+                            hrp.AssemblyLinearVelocity = Vector3.new(0,0,dir.Z*1.5)
+                            task.wait()
+                        end
+                    elseif absX > absZ then
+                        for i=1,40 do
+                            hrp.AssemblyLinearVelocity = Vector3.new(dir.X*1.5,0,0)
+                            task.wait()
+                        end
                     end
-                elseif absX > absZ then
-                    for i=1,40 do
-                        hrp.AssemblyLinearVelocity = Vector3.new(dir.X*1.5,0,0)
-                        task.wait()
-                    end
+                    wait()
+                    hrp.AssemblyLinearVelocity = Vector3.new(hrp.AssemblyLinearVelocity.X * 2, hrp.AssemblyLinearVelocity.Y * 1, hrp.AssemblyLinearVelocity.Z * 2)
+                    wait(0.2)
+                    PsTxt.Color = white
                 end
-                wait()
-                hrp.AssemblyLinearVelocity = Vector3.new(hrp.AssemblyLinearVelocity.X * 2, hrp.AssemblyLinearVelocity.Y * 1, hrp.AssemblyLinearVelocity.Z * 2)
-                wait(0.2)
-                PsTxt.Color = white
             end
+        else
+            GUIStates.psing = false
+            PsTxt.Visible = false
+            PsTxt.Color = white
+            --pixel surf!--
         end
-    else
-        GUIStates.psing = false
-        PsTxt.Visible = false
-        PsTxt.Color = white
-        --pixel surf!--
-    end
-    local speed = hrp.AssemblyLinearVelocity
-    local bx = math.abs(speed.X^2)
-    local bz = math.abs(speed.Z^2)
-    local totalVel = math.sqrt(bx + bz) --calcs horizontal velocity
-    local toVel = string.format("%.2f", totalVel)
-    velo.Text = toVel
-    if totalVel > pre and totalVel > 1 and CFG.velocolors == true then
-        velo.Color = green
-    elseif totalVel < pre and totalVel > 1 and CFG.velocolors == true  then
-        velo.Color = orange
-    elseif totalVel < 1 and CFG.velocolors == true  then
-        velo.Color = white
-    end
-    wait(0.0001)
-    pre = totalVel
-    if GUIStates.bhop and iskeypressed(0x20) then
-        keypress(0x20)
-        keyrelease(0x20)
-    end
+        local speed = hrp.AssemblyLinearVelocity
+        local bx = math.abs(speed.X^2)
+        local bz = math.abs(speed.Z^2)
+        local totalVel = math.sqrt(bx + bz) --calcs horizontal velocity
+        local toVel = string.format("%.2f", totalVel)
+        velo.Text = toVel
+        if totalVel > pre and totalVel > 1 and CFG.velocolors == true then
+            velo.Color = green
+        elseif totalVel < pre and totalVel > 1 and CFG.velocolors == true  then
+            velo.Color = orange
+        elseif totalVel < 1 and CFG.velocolors == true  then
+            velo.Color = white
+        end
+        wait(0.0001)
+        pre = totalVel
+        if GUIStates.bhop and iskeypressed(0x20) then
+            keypress(0x20)
+            keyrelease(0x20)
+        end
 end
