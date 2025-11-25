@@ -3,7 +3,7 @@
 --BHOP is not done yet just use velocity--
 local CFG = {
     --binds
-    EB = 0xA0; --left shift
+    EB = 0xA0; --lshift
     JB = 0x06; --mb5
     ps = 0x05; --mb4
     velocityind = true; --do u want velocity indicator on?
@@ -24,8 +24,7 @@ local GUIStates = { --preparing thyself for gui soon
     bhop = true --set to false when doing gui - doink
 }
 local playerS = game:GetService("Players")
-local player = playerS.LocalPlayer.Character
-local hrp = player:WaitForChild("HumanoidRootPart")
+local player = playerS.LocalPlayer
 local white = Color3.fromRGB(255,255,255) --white
 local pos = Vector2.new(950, 720)--txt pos
 local green = Color3.fromRGB(0,255,0)--green
@@ -63,6 +62,10 @@ local PsTxt = Create("Text",{Position = Vector2.new(980, 750),Text = "PS",Color 
 print("moon.lua by doink :)")
 print("discord server -- https://discord.gg/BxAWmtP7cp")
 --loop--
+local function GetHRP()
+    local char = player.Character
+    return char:WaitForChild("HumanoidRootPart")
+end
 local pre = 0
 local h = 0
 local t = 0
@@ -81,6 +84,7 @@ while true do
         task.wait()
         if EBpressed then
             if player and not GUIStates.edging then
+                local hrp = GetHRP()
                 local dir = hrp.AssemblyLinearVelocity
                 if math.abs(dir.X) > 1 and  math.abs(dir.Y) > 1 or math.abs(dir.Z) > 1 and  math.abs(dir.Y) > 1  then
                     ebTxt.Visible = true
@@ -88,7 +92,7 @@ while true do
                     ebTxt.Color = green
                     for i=1,5 do
                         wait()
-                        hrp.AssemblyLinearVelocity = Vector3.new(dir.X * 1.2, dir.Y * 0, dir.Z * 1.2) - Vector3.new(0,20,0)
+                        hrp.AssemblyLinearVelocity = Vector3.new(dir.X * 1.2, dir.Y * 0, dir.Z * 1.2) - Vector3.new(0,15,0)
                     end
                     wait()
                     hrp.AssemblyLinearVelocity = Vector3.new(hrp.AssemblyLinearVelocity.X * 1.8, hrp.AssemblyLinearVelocity.Y * 1, hrp.AssemblyLinearVelocity.Z * 2)
@@ -107,6 +111,7 @@ while true do
         end
         if JBpressed then
             if player and not GUIStates.jbing then
+                local hrp = GetHRP()
                 local dir = hrp.AssemblyLinearVelocity
                 if math.abs(dir.X) > 1 or math.abs(dir.Z) > 1 then
                     JBTxt.Visible = true
@@ -130,6 +135,7 @@ while true do
         end
         if Pspressed then
             if player and not GUIStates.psing then
+                local hrp = GetHRP()
                 local dir = hrp.AssemblyLinearVelocity
                 if math.abs(dir.X) > 1  or math.abs(dir.Z) > 1 then
                     local absX = math.abs(dir.X)
@@ -149,7 +155,7 @@ while true do
                         end
                     end
                     wait()
-                    hrp.AssemblyLinearVelocity = Vector3.new(hrp.AssemblyLinearVelocity.X * 2, hrp.AssemblyLinearVelocity.Y * 1, hrp.AssemblyLinearVelocity.Z * 2)
+                    hrp.AssemblyLinearVelocity = Vector3.new(hrp.AssemblyLinearVelocity.X * 1.2, hrp.AssemblyLinearVelocity.Y * 1, hrp.AssemblyLinearVelocity.Z * 1.2)
                     wait(0.2)
                     PsTxt.Color = white
                 end
@@ -160,6 +166,7 @@ while true do
             PsTxt.Color = white
             --pixel surf!--
         end
+        local hrp = GetHRP()
         local speed = hrp.AssemblyLinearVelocity
         local bx = math.abs(speed.X^2)
         local bz = math.abs(speed.Z^2)
