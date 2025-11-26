@@ -5,7 +5,7 @@
 local CFG = {
     --helps for offcentered ui(NOT ACCURATE)--
     resolutionX = 1920; --put in ur X resoltuion ex: 1920x1080 resolutionX would be 1920 and resolutionY would be 1080
-    resolutionY = 1080 --put in ur Y resoltuion ex: 1920x1080 resolutionX would be 1920 and resolutionY would be 1080
+    resolutionY = 1080; --put in ur Y resoltuion ex: 1920x1080 resolutionX would be 1920 and resolutionY would be 1080
     --binds
     EB = 0xA0; --lshift
     JB = 0x06; --mb5
