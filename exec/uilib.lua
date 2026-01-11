@@ -1,4 +1,4 @@
--- insert troll face, memcorruptv2
+--this is Cattoware ui library if ur curious
 local library = { 
 	flags = { }, 
 	items = { } 
