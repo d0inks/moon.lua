@@ -2862,11 +2862,11 @@ function library:CreateWindow(name, size, hidebutton)
 				end
 
                 keybind.text = text or ""
+                keybind.mode = type or "Hold"
                 keybind.default = default or "None"
                 keybind.callback = callback or function() end
                 keybind.newkeycallback = newkeycallback or function(key) end
                 keybind.flag = flag or text or ""
-                keybind.mode = type or "Hold"
 
                 keybind.value = keybind.default
 
@@ -3027,7 +3027,6 @@ function library:CreateWindow(name, size, hidebutton)
                         pcall(keybind.callback,true)
                     end
                 end)
-
 
                 sector:FixSize()
                 table.insert(library.items, keybind)
