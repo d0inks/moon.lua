@@ -2812,7 +2812,7 @@ function library:CreateWindow(name, size, hidebutton)
                 return colorpicker
             end
 
-            function sector:AddKeybind(text,type,default,newkeycallback,callback,flag)
+            function sector:AddKeybind(text,ModeType,default,newkeycallback,callback,flag)
                 local keybind = { }
 				local KeyModes = {
 					"Hold",
@@ -2862,7 +2862,7 @@ function library:CreateWindow(name, size, hidebutton)
 				end
 
                 keybind.text = text or ""
-                keybind.mode = type or "Hold"
+                keybind.mode = ModeType or "Hold"
                 keybind.default = default or "None"
                 keybind.callback = callback or function() end
                 keybind.newkeycallback = newkeycallback or function(key) end
@@ -3005,14 +3005,7 @@ function library:CreateWindow(name, size, hidebutton)
                             keybind:Set("None")
                         end
                     else
-                        if keybind.value ~= "None" and inputMatchesKey(input, keybind.value) then
-                            if keybind.mode == "Hold" then
-                                pcall(keybind.callback, true)
-                            elseif keybind.mode == "Toggle" then
-                                keybind.toggled = not keybind.toggled
-                                pcall(keybind.callback, keybind.toggled)
-                            end
-                        end
+                        keybind:Set(keybind.default and keybind.default or "None")
                     end
                 end)
                 uis.InputEnded:Connect(function(input, gameProcessed)
@@ -3027,6 +3020,7 @@ function library:CreateWindow(name, size, hidebutton)
                         pcall(keybind.callback,true)
                     end
                 end)
+
 
                 sector:FixSize()
                 table.insert(library.items, keybind)
