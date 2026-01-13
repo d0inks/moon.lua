@@ -43,7 +43,7 @@ library.theme = {
     itemscolor = Color3.fromRGB(200, 200, 200),
     itemscolor2 = Color3.fromRGB(210, 210, 210)
 }
-
+--[[
 if library.theme.cursor and Drawing then
     local success = pcall(function() 
         library.cursor = Drawing.new("Image")
@@ -70,6 +70,7 @@ if library.theme.cursor and Drawing then
         library.cursor:Remove()
     end
 end
+]]--
 
 function library:CreateWatermark(name, position)
     local gamename = marketplaceservice:GetProductInfo(game.PlaceId).Name
