@@ -25,7 +25,6 @@ library.theme = {
     background = "rbxassetid://5553946656",
     tilesize = 90,
     cursor = true,
-    cursorimg = "https://t0.rbxcdn.com/42f66da98c40252ee151326a82aab51f",
     backgroundcolor = Color3.fromRGB(20, 20, 20),
     tabstextcolor = Color3.fromRGB(240, 240, 240),
     bordercolor = Color3.fromRGB(60, 60, 60),
@@ -47,7 +46,7 @@ library.theme = {
 if library.theme.cursor and Drawing then
     local success = pcall(function() 
         library.cursor = Drawing.new("Image")
-        library.cursor.Data = game:HttpGet(library.theme.cursorimg)
+        library.cursor.Data = "rbxassetid://2674704848
         library.cursor.Size = Vector2.new(64, 64)
         library.cursor.Visible = uis.MouseEnabled
         library.cursor.Rounding = 0
