@@ -192,7 +192,7 @@ function library:CreateWindow(name, size, hidebutton)
     window.size = UDim2.fromOffset(size.X, size.Y) or UDim2.fromOffset(492, 598)
     window.hidebutton = hidebutton or Enum.KeyCode.RightShift
     window.theme = library.theme
-
+s
     local updateevent = Instance.new("BindableEvent")
     function window:UpdateTheme(theme)
         updateevent:Fire(theme or library.theme)
@@ -2827,7 +2827,7 @@ function library:CreateWindow(name, size, hidebutton)
 						modePopup = nil
 						return
 					end
-					modePopup = Instance.new("Frame")
+					modePopup = Instance.new("Frame", sector.Items)
 					modePopup.Parent = window.Main
 					modePopup.ZIndex = 100
 					modePopup.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
@@ -2840,7 +2840,7 @@ function library:CreateWindow(name, size, hidebutton)
 					modePopup.Position = UDim2.fromOffset(absPos.X + absSize.X + 6, absPos.Y)
 
 					for i, modeName in ipairs(KeyModes) do
-						local btn = Instance.new("TextButton")
+						local btn = Instance.new("TextButton",sector.Items)
 						btn.Parent = modePopup
 						btn.Size = UDim2.new(1, 0, 0, 22)
 						btn.Position = UDim2.fromOffset(0, (i - 1) * 22)
@@ -2987,22 +2987,52 @@ function library:CreateWindow(name, size, hidebutton)
                     return keybind.value
                 end
 
+                local function inputMatchesKey(input, key)
+                    if typeof(key) == "EnumItem" then
+                        return input.KeyCode == key
+                    elseif typeof(key) == "userdata" and key.UserInputType then
+                        return input.UserInputType == key.UserInputType
+                    elseif typeof(key) == "string" then
+                        return (key == "M1" and input.UserInputType == Enum.UserInputType.MouseButton1)
+                            or (key == "M2" and input.UserInputType == Enum.UserInputType.MouseButton2)
+                            or (key == "M3" and input.UserInputType == Enum.UserInputType.MouseButton3)
+                    end
+                    return false
+                end
                 uis.InputBegan:Connect(function(input, gameProcessed)
-                    if not gameProcessed then
-                        if keybind.Bind.Text == "[...]" then
-                            keybind.Bind.TextColor3 = Color3.fromRGB(136, 136, 136)
-                            if input.KeyCode ~= Enum.KeyCode.Unknown then
-                                keybind:Set(input.KeyCode)
-                            else
-                                keybind:Set("None")
-                            end
+                    if gameProcessed then return end
+                    if keybind.Bind.Text == "[...]" then
+                        keybind.Bind.TextColor3 = Color3.fromRGB(136, 136, 136)
+                        if input.KeyCode ~= Enum.KeyCode.Unknown or input.UserInputType then
+                            keybind:Set(input.KeyCode ~= Enum.KeyCode.Unknown and input.KeyCode or input.UserInputType)
                         else
-                            if keybind.value ~= "None" and input.KeyCode == keybind.value then
-                                pcall(keybind.callback)
+                            keybind:Set("None")
+                        end
+                    else
+                        if keybind.value ~= "None" and inputMatchesKey(input, keybind.value) then
+                            if keybind.mode == "Hold" then
+                                pcall(keybind.callback, true)
+                            elseif keybind.mode == "Toggle" then
+                                keybind.toggled = not keybind.toggled
+                                pcall(keybind.callback, keybind.toggled)
                             end
                         end
                     end
                 end)
+                uis.InputEnded:Connect(function(input, gameProcessed)
+                    if gameProcessed then return end
+                    if keybind.mode == "Hold" and keybind.value ~= "None" and inputMatchesKey(input, keybind.value) then
+                        pcall(keybind.callback, false)
+                    end
+                end)
+
+                game:GetService("RunService").RenderStepped:Connect(function()
+                    if keybind.mode == "Always" and keybind.value ~= "None" then
+                        pcall(keybind.callback)
+                    end
+                end)
+
+
                 sector:FixSize()
                 table.insert(library.items, keybind)
                 return keybind
