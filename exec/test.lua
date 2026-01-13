@@ -2854,10 +2854,7 @@ function library:CreateWindow(name, size, hidebutton)
 
 						btn.MouseButton1Click:Connect(function()
 							keybind.mode = modeName
-							if keybind.flag and keybind.flag ~= "" then
-								library.flags[keybind.flag .. "_mode"] = modeName
-							end
-
+                            print(keybind.mode)
 							modePopup:Destroy()
 							modePopup = nil
 						end)
@@ -2918,7 +2915,7 @@ function library:CreateWindow(name, size, hidebutton)
 						keybind.toggled = not keybind.toggled
 						pcall(keybind.callback, keybind.toggled)
 					elseif keybind.mode == "Always" then
-						pcall(keybind.callback)
+						pcall(keybind.callback,true)
 					end
 				end
 
@@ -3027,7 +3024,7 @@ function library:CreateWindow(name, size, hidebutton)
 
                 game:GetService("RunService").RenderStepped:Connect(function()
                     if keybind.mode == "Always" and keybind.value ~= "None" then
-                        pcall(keybind.callback)
+                        pcall(keybind.callback,true)
                     end
                 end)
 
