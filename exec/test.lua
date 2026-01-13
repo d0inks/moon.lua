@@ -3024,7 +3024,7 @@ function library:CreateWindow(name, size, hidebutton)
 
                 game:GetService("RunService").RenderStepped:Connect(function()
                     if keybind.mode == "Always" and keybind.value ~= "None" then
-                        pcall(keybind.callback,keybind.value)
+                        pcall(keybind.callback,true)
                     end
                 end)
 
