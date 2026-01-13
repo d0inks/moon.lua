@@ -1,4 +1,4 @@
--- insert troll face, memcorruptv2
+--cattoware ui!
 local library = { 
 	flags = { }, 
 	items = { } 
@@ -24,13 +24,11 @@ library.theme = {
     font = Enum.Font.Code,
     background = "rbxassetid://5553946656",
     tilesize = 90,
-    cursor = true,
-    cursorimg = "https://tr.rbxcdn.com/180DAY-869591f0f5737c33bafd693bf63febb0/420/420/Decal/Webp/noFilter",
     backgroundcolor = Color3.fromRGB(20, 20, 20),
     tabstextcolor = Color3.fromRGB(240, 240, 240),
     bordercolor = Color3.fromRGB(60, 60, 60),
-    accentcolor = Color3.fromRGB(28, 56, 139),
-    accentcolor2 = Color3.fromRGB(16, 31, 78),
+    accentcolor = Color3.fromRGB(111, 19, 231),
+    accentcolor2 = Color3.fromRGB(108, 46, 250),
     outlinecolor = Color3.fromRGB(60, 60, 60),
     outlinecolor2 = Color3.fromRGB(0, 0, 0),
     sectorcolor = Color3.fromRGB(30, 30, 30),
@@ -43,34 +41,6 @@ library.theme = {
     itemscolor = Color3.fromRGB(200, 200, 200),
     itemscolor2 = Color3.fromRGB(210, 210, 210)
 }
---[[
-if library.theme.cursor and Drawing then
-    local success = pcall(function() 
-        library.cursor = Drawing.new("Image")
-        library.cursor.Data = game:HttpGet(library.theme.cursorimg)
-        library.cursor.Size = Vector2.new(64, 64)
-        library.cursor.Visible = uis.MouseEnabled
-        library.cursor.Rounding = 0
-        library.cursor.Position = Vector2.new(mouse.X - 32, mouse.Y + 6)
-    end)
-    if success and library.cursor then
-        uis.InputChanged:Connect(function(input)
-            if uis.MouseEnabled then
-                if input.UserInputType == Enum.UserInputType.MouseMovement then
-                    library.cursor.Position = Vector2.new(input.Position.X - 32, input.Position.Y + 7)
-                end
-            end
-        end)
-        
-        game:GetService("RunService").RenderStepped:Connect(function()
-            uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
-            library.cursor.Visible = uis.MouseEnabled and (uis.MouseIconEnabled or game:GetService("GuiService").MenuIsOpen)
-        end)
-    elseif not success and library.cursor then
-        library.cursor:Remove()
-    end
-end
-]]--
 
 function library:CreateWatermark(name, position)
     local gamename = marketplaceservice:GetProductInfo(game.PlaceId).Name
@@ -222,7 +192,6 @@ function library:CreateWindow(name, size, hidebutton)
     window.size = UDim2.fromOffset(size.X, size.Y) or UDim2.fromOffset(492, 598)
     window.hidebutton = hidebutton or Enum.KeyCode.RightShift
     window.theme = library.theme
-
     local updateevent = Instance.new("BindableEvent")
     function window:UpdateTheme(theme)
         updateevent:Fire(theme or library.theme)
@@ -2843,10 +2812,57 @@ function library:CreateWindow(name, size, hidebutton)
                 return colorpicker
             end
 
-            function sector:AddKeybind(text,default,newkeycallback,callback,flag)
+            function sector:AddKeybind(text,ModeType,default,newkeycallback,callback,flag)
                 local keybind = { }
+                local KeyModes = {
+                    "Hold",
+                    "Toggle",
+                    "Always",
+                }
+                local modePopup
+                local function ShowKeyModes()
+                    if modePopup then
+                        modePopup:Destroy()
+                        modePopup = nil
+                        return
+                    end
+                    modePopup = Instance.new("Frame",sector.Items)
+                    modePopup.Parent = window.Main
+                    modePopup.ZIndex = 100
+                    modePopup.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+                    modePopup.BorderColor3 = window.theme.outlinecolor
+                    modePopup.BorderSizePixel = 1
+                    modePopup.Size = UDim2.fromOffset(80, 66)
+
+                    local absPos = keybind.Bind.AbsolutePosition
+                    local absSize = keybind.Bind.AbsoluteSize
+                    modePopup.Position = UDim2.fromOffset(absPos.X + absSize.X + 6, absPos.Y)
+
+                    for i, modeName in ipairs(KeyModes) do
+                        local btn = Instance.new("TextButton",sector.Items)
+                        btn.Parent = modePopup
+                        btn.Size = UDim2.new(1, 0, 0, 22)
+                        btn.Position = UDim2.fromOffset(0, (i - 1) * 22)
+                        btn.BackgroundTransparency = 1
+                        btn.Text = modeName
+                        btn.Font = window.theme.font
+                        btn.TextSize = 14
+                        btn.ZIndex = 101
+
+                        btn.TextColor3 = (keybind.mode == modeName) and window.theme.accentcolor
+                            or Color3.fromRGB(170, 170, 170)
+
+                        btn.MouseButton1Click:Connect(function()
+                            keybind.mode = modeName
+                            print(keybind.mode)
+                            modePopup:Destroy()
+                            modePopup = nil
+                        end)
+                    end
+                end
 
                 keybind.text = text or ""
+                keybind.mode = ModeType or "Hold"
                 keybind.default = default or "None"
                 keybind.callback = callback or function() end
                 keybind.newkeycallback = newkeycallback or function(key) end
@@ -2884,29 +2900,49 @@ function library:CreateWindow(name, size, hidebutton)
                     keybind.Bind.Text = "[...]"
                     keybind.Bind.TextColor3 = window.theme.accentcolor
                 end)
+                keybind.Bind.MouseButton2Down:Connect(function()
+                    ShowKeyModes()
+                end)
                 updateevent.Event:Connect(function(theme)
                     keybind.Bind.BorderColor3 = theme.outlinecolor
                     keybind.Bind.Font = theme.font
                 end)
-
-                if keybind.flag and keybind.flag ~= "" then
-                    library.flags[keybind.flag] = keybind.default
-                end
-
+                
                 local shorter_keycodes = {
                     ["LeftShift"] = "LSHIFT",
                     ["RightShift"] = "RSHIFT",
                     ["LeftControl"] = "LCTRL",
                     ["RightControl"] = "RCTRL",
                     ["LeftAlt"] = "LALT",
-                    ["RightAlt"] = "RALT"
+                    ["RightAlt"] = "RALT",
+                    ["MouseButton1"] = "M1",
+                    ["MouseButton2"] = "M2",
+                    ["MouseButton3"] = "M3"
                 }
-
+                
+                local function getDisplayName(value)
+                    if value == "None" then return "None" end
+                    
+                    if typeof(value) == "EnumItem" then
+                        if value.EnumType == Enum.KeyCode then
+                            return value.Name
+                        elseif value.EnumType == Enum.UserInputType then
+                            if value == Enum.UserInputType.MouseButton1 then
+                                return "MouseButton1"
+                            elseif value == Enum.UserInputType.MouseButton2 then
+                                return "MouseButton2"
+                            elseif value == Enum.UserInputType.MouseButton3 then
+                                return "MouseButton3"
+                            end
+                        end
+                    end
+                    return tostring(value)
+                end
+                
                 function keybind:Set(value)
                     if value == "None" then
-                        keybind.value = value
-                        keybind.Bind.Text = "[" .. value .. "]"
-    
+                        keybind.value = "None"
+                        keybind.Bind.Text = "[None]"
                         local size = textservice:GetTextSize(keybind.Bind.Text, keybind.Bind.TextSize, keybind.Bind.Font, Vector2.new(2000, 2000))
                         keybind.Bind.Size = UDim2.fromOffset(size.X, size.Y)
                         keybind.Bind.Position = UDim2.fromOffset(sector.Main.Size.X.Offset - 10 - keybind.Bind.AbsoluteSize.X, 0)
@@ -2914,10 +2950,12 @@ function library:CreateWindow(name, size, hidebutton)
                             library.flags[keybind.flag] = value
                         end
                         pcall(keybind.newkeycallback, value)
+                        return
                     end
 
                     keybind.value = value
-                    keybind.Bind.Text = "[" .. (shorter_keycodes[value.Name or value] or (value.Name or value)) .. "]"
+                    local displayName = getDisplayName(value)
+                    keybind.Bind.Text = "[" .. (shorter_keycodes[displayName] or displayName) .. "]"
 
                     local size = textservice:GetTextSize(keybind.Bind.Text, keybind.Bind.TextSize, keybind.Bind.Font, Vector2.new(2000, 2000))
                     keybind.Bind.Size = UDim2.fromOffset(size.X, size.Y)
@@ -2927,6 +2965,7 @@ function library:CreateWindow(name, size, hidebutton)
                     end
                     pcall(keybind.newkeycallback, value)
                 end
+
                 keybind:Set(keybind.default and keybind.default or "None")
 
                 function keybind:Get()
@@ -2934,19 +2973,67 @@ function library:CreateWindow(name, size, hidebutton)
                 end
 
                 uis.InputBegan:Connect(function(input, gameProcessed)
-                    if not gameProcessed then
-                        if keybind.Bind.Text == "[...]" then
-                            keybind.Bind.TextColor3 = Color3.fromRGB(136, 136, 136)
-                            if input.UserInputType == Enum.UserInputType.Keyboard then
-                                keybind:Set(input.KeyCode)
-                            else
-                                keybind:Set("None")
-                            end
+                    if keybind.Bind.Text == "[...]" then
+                        keybind.Bind.TextColor3 = Color3.fromRGB(136, 136, 136)
+                        if input.UserInputType == Enum.UserInputType.Keyboard then
+                            keybind:Set(input.KeyCode)
+                        elseif input.UserInputType == Enum.UserInputType.MouseButton1 or 
+                            input.UserInputType == Enum.UserInputType.MouseButton2 or 
+                            input.UserInputType == Enum.UserInputType.MouseButton3 then
+                            keybind:Set(input.UserInputType)
                         else
-                            if keybind.value ~= "None" and input.KeyCode == keybind.value then
-                                pcall(keybind.callback)
+                            keybind:Set("None")
+                        end
+                        if keybind.value ~= "None" then
+                            local isMatch = false
+                            if typeof(keybind.value) == "EnumItem" then
+                                if keybind.value.EnumType == Enum.KeyCode then
+                                    if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == keybind.value then
+                                        isMatch = true
+                                    end
+                                elseif keybind.value.EnumType == Enum.UserInputType then
+                                    if input.UserInputType == keybind.value then
+                                        isMatch = true
+                                    end
+                                end
+                            end
+                            if isMatch then
+                                if keybind.mode == "Toggle" then
+                                    keybind.toggled = not keybind.toggled
+                                    pcall(keybind.callback, keybind.toggled)
+                                elseif keybind.mode == "Hold" then
+                                    pcall(keybind.callback, true)
+                                end
                             end
                         end
+                    end
+                end)
+
+                uis.InputEnded:Connect(function(input, gameProcessed)
+                    if gameProcessed then return end
+                    if keybind.mode == "Hold" and keybind.value ~= "None" then
+                        local isMatch = false
+                        if typeof(keybind.value) == "EnumItem" then
+                            if keybind.value.EnumType == Enum.KeyCode then
+                                if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == keybind.value then
+                                    isMatch = true
+                                end
+                            elseif keybind.value.EnumType == Enum.UserInputType then
+                                if input.UserInputType == keybind.value then
+                                    isMatch = true
+                                end
+                            end
+                        end
+                        
+                        if isMatch then
+                            pcall(keybind.callback, false)
+                        end
+                    end
+                end)
+
+                game:GetService("RunService").RenderStepped:Connect(function()
+                    if keybind.mode == "Always" and keybind.value ~= "None" then
+                        pcall(keybind.callback,true)
                     end
                 end)
 
