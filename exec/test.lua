@@ -2826,7 +2826,7 @@ function library:CreateWindow(name, size, hidebutton)
 						modePopup = nil
 						return
 					end
-					modePopup = Instance.new("Frame")
+					modePopup = Instance.new("Frame",sector.Items)
 					modePopup.Parent = window.Main
 					modePopup.ZIndex = 100
 					modePopup.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
@@ -2839,7 +2839,7 @@ function library:CreateWindow(name, size, hidebutton)
 					modePopup.Position = UDim2.fromOffset(absPos.X + absSize.X + 6, absPos.Y)
 
 					for i, modeName in ipairs(KeyModes) do
-						local btn = Instance.new("TextButton")
+						local btn = Instance.new("TextButton",sector.Items)
 						btn.Parent = modePopup
 						btn.Size = UDim2.new(1, 0, 0, 22)
 						btn.Position = UDim2.fromOffset(0, (i - 1) * 22)
