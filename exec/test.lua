@@ -3005,7 +3005,6 @@ function library:CreateWindow(name, size, hidebutton)
                             keybind:Set("None")
                         end
                     else
-                        keybind:Set(keybind.default and keybind.default or "None")
                     end
                 end)
                 uis.InputEnded:Connect(function(input, gameProcessed)
