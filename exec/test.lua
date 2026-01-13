@@ -2933,24 +2933,26 @@ function library:CreateWindow(name, size, hidebutton)
                     end
 
                     keybind.value = value
-                    local display = ""
-					if typeof(value) == "EnumItem" then
-						display = shorter_keycodes[value.Name] or value.Name
-					elseif typeof(value) == "userdata" and value.UserInputType then
-						if value.UserInputType == Enum.UserInputType.MouseButton1 then
-							display = "M1"
-						elseif value.UserInputType == Enum.UserInputType.MouseButton2 then
-							display = "M2"
-						elseif value.UserInputType == Enum.UserInputType.MouseButton3 then
-							display = "M3"
-						else
-							display = "None"
-						end
-					else
-						display = tostring(value)
-					end
-
-					keybind.Bind.Text = "[" .. display .. "]"
+                    local displayText
+                    if typeof(value) == "EnumItem" then
+                        if value.EnumType == Enum.KeyCode then
+                            displayText = value.Name
+                        elseif value.EnumType == Enum.UserInputType then
+                            if value == Enum.UserInputType.MouseButton1 then
+                                displayText = "MouseButton1"
+                            elseif value == Enum.UserInputType.MouseButton2 then
+                                displayText = "MouseButton2"
+                            elseif value == Enum.UserInputType.MouseButton3 then
+                                displayText = "MouseButton3"
+                            else
+                                displayText = value.Name
+                            end
+                        end
+                    else
+                        displayText = value
+                    end
+                    
+                    keybind.Bind.Text = "[" .. (shorter_keycodes[displayText] or displayText) .. "]"
 
 
                     local size = textservice:GetTextSize(keybind.Bind.Text, keybind.Bind.TextSize, keybind.Bind.Font, Vector2.new(2000, 2000))
@@ -2984,18 +2986,13 @@ function library:CreateWindow(name, size, hidebutton)
                 end
                 uis.InputBegan:Connect(function(input, gameProcessed)
                     if gameProcessed then return end
-
                     if keybind.Bind.Text == "[...]" then
                         keybind.Bind.TextColor3 = Color3.fromRGB(136, 136, 136)
                         local newKey
                         if input.UserInputType == Enum.UserInputType.Keyboard then
                             newKey = input.KeyCode
-                        elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
-                            newKey = "M1"
-                        elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
-                            newKey = "M2"
-                        elseif input.UserInputType == Enum.UserInputType.MouseButton3 then
-                            newKey = "M3"
+                        elseif input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.MouseButton2 or input.UserInputType == Enum.UserInputType.MouseButton3 then
+                            keybind:Set(input.UserInputType)
                         else
                             newKey = "None"
                         end
