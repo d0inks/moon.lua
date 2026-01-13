@@ -2990,7 +2990,7 @@ function library:CreateWindow(name, size, hidebutton)
                 uis.InputBegan:Connect(function(input, gameProcessed)
                     if not gameProcessed then
                         if keybind.Bind.Text == "[...]" then
-                            keybind.Bind.TextColor3 = Color3.fromRGB(136, 136, 136) then
+                            keybind.Bind.TextColor3 = Color3.fromRGB(136, 136, 136)
                             if input.KeyCode ~= Enum.KeyCode.Unknown then
                                 keybind:Set(input.KeyCode)
                             else
