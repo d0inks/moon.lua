@@ -2907,18 +2907,6 @@ function library:CreateWindow(name, size, hidebutton)
                     keybind.Bind.BorderColor3 = theme.outlinecolor
                     keybind.Bind.Font = theme.font
                 end)
-
-				if keybind.value ~= "None" and input.KeyCode == keybind.value then
-					if keybind.mode == "Hold" then
-						pcall(keybind.callback, true)
-					elseif keybind.mode == "Toggle" then
-						keybind.toggled = not keybind.toggled
-						pcall(keybind.callback, keybind.toggled)
-					elseif keybind.mode == "Always" then
-						pcall(keybind.callback,true)
-					end
-				end
-
                 local shorter_keycodes = {
                     ["LeftShift"] = "LSHIFT",
                     ["RightShift"] = "RSHIFT",
@@ -2930,7 +2918,6 @@ function library:CreateWindow(name, size, hidebutton)
                     ["MouseButton2"] = "M2",
                     ["MouseButton3"] = "M3"
                 }
-
                 function keybind:Set(value)
                     if value == "None" then
                         keybind.value = value
@@ -2997,16 +2984,34 @@ function library:CreateWindow(name, size, hidebutton)
                 end
                 uis.InputBegan:Connect(function(input, gameProcessed)
                     if gameProcessed then return end
+
                     if keybind.Bind.Text == "[...]" then
                         keybind.Bind.TextColor3 = Color3.fromRGB(136, 136, 136)
-                        if input.KeyCode ~= Enum.KeyCode.Unknown or input.UserInputType then
-                            keybind:Set(input.KeyCode ~= Enum.KeyCode.Unknown and input.KeyCode or input.UserInputType)
+                        local newKey
+                        if input.UserInputType == Enum.UserInputType.Keyboard then
+                            newKey = input.KeyCode
+                        elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
+                            newKey = "M1"
+                        elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
+                            newKey = "M2"
+                        elseif input.UserInputType == Enum.UserInputType.MouseButton3 then
+                            newKey = "M3"
                         else
-                            keybind:Set("None")
+                            newKey = "None"
                         end
+                        keybind:Set(newKey)
                     else
+                        if keybind.value ~= "None" and inputMatchesKey(input, keybind.value) then
+                            if keybind.mode == "Toggle" then
+                                keybind.toggled = not keybind.toggled
+                                pcall(keybind.callback, keybind.toggled)
+                            elseif keybind.mode == "Hold" then
+                                pcall(keybind.callback, true)
+                            end
+                        end
                     end
                 end)
+
                 uis.InputEnded:Connect(function(input, gameProcessed)
                     if gameProcessed then return end
                     if keybind.mode == "Hold" and keybind.value ~= "None" and inputMatchesKey(input, keybind.value) then
