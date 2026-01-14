@@ -3360,15 +3360,19 @@ function library:CreateWindow(name, size, hidebutton)
 						return
 					end
 					if keybind.Bind.Text == "[...]" then
+						local key
 						keybind.Bind.TextColor3 = Color3.fromRGB(136, 136, 136)
 						if input.UserInputType == Enum.UserInputType.Keyboard then
 							keybind:Set(input.KeyCode)
-						elseif
-							input.UserInputType == Enum.UserInputType.MouseButton1
-							or input.UserInputType == Enum.UserInputType.MouseButton2
-							or input.UserInputType == Enum.UserInputType.MouseButton3
-						then
-							keybind:Set(input.UserInputType)
+						elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
+							key = Enum.UserInputType.MouseButton1
+							keybind:Set(key)
+						elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
+							key = Enum.UserInputType.MouseButton2
+							keybind:Set(key)
+						elseif input.UserInputType == Enum.UserInputType.MouseButton3 then
+							key = Enum.UserInputType.MouseButton3
+							keybind:Set(key)
 						else
 							keybind:Set("None")
 						end
@@ -3376,10 +3380,7 @@ function library:CreateWindow(name, size, hidebutton)
 							local isMatch = false
 							if typeof(keybind.value) == "EnumItem" then
 								if keybind.value.EnumType == Enum.KeyCode then
-									if
-										input.UserInputType == Enum.UserInputType.Keyboard
-										and input.KeyCode == keybind.value
-									then
+									if input.UserInputType == Enum.UserInputType.Keyboardand and input.KeyCode == keybind.value then
 										isMatch = true
 									end
 								elseif keybind.value.EnumType == Enum.UserInputType then
