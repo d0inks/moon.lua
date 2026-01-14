@@ -3380,7 +3380,7 @@ function library:CreateWindow(name, size, hidebutton)
 							local isMatch = false
 							if typeof(keybind.value) == "EnumItem" then
 								if keybind.value.EnumType == Enum.KeyCode then
-									if input.UserInputType == Enum.UserInputType.Keyboardand and input.KeyCode == keybind.value then
+									if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == keybind.value then
 										isMatch = true
 									end
 								elseif keybind.value.EnumType == Enum.UserInputType then
