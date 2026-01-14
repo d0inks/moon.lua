@@ -211,7 +211,7 @@ function library:CreateWindow(name, size, hidebutton)
     getgenv().uilib = window.Main
 
     local dragging, dragInput, dragStart, startPos
-    uis.InputChanged:Connect(function(input)
+    .InputChanged:Connect(function(input)
         if input == dragInput and dragging then
             local delta = input.Position - dragStart
             window.Frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
@@ -251,7 +251,7 @@ function library:CreateWindow(name, size, hidebutton)
         window.Frame.BackgroundColor3 = theme.backgroundcolor
     end)
 
-    uis.InputBegan:Connect(function(key)
+    .InputBegan:Connect(function(key)
         if key.KeyCode == window.hidebutton then
             window.Frame.Visible = not window.Frame.Visible
         end
@@ -2973,6 +2973,7 @@ function library:CreateWindow(name, size, hidebutton)
                 end
 
                 uis.InputBegan:Connect(function(input, gameProcessed)
+	        if gameProcessed then return end
                     if keybind.Bind.Text == "[...]" then
                         keybind.Bind.TextColor3 = Color3.fromRGB(136, 136, 136)
                         if input.UserInputType == Enum.UserInputType.Keyboard then
