@@ -68,7 +68,7 @@ if library.theme.cursor and Drawing then
                 end
             end
         end)
-		RunService.RenderStepped:Connect(function()
+		game:GetService("RunService").RenderStepped:Connect(function()
 			local visible = not GuiService.MenuIsOpen
 			library.cursor.Visible = visible
 			library.cursor1.Visible = visible
