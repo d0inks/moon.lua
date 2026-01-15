@@ -68,11 +68,6 @@ if library.theme.cursor and Drawing then
                 end
             end
         end)
-		runservice.RenderStepped:Connect(function()
-			local visible = not GuiService.MenuIsOpen
-			library.cursor.Visible = visible
-			library.cursor1.Visible = visible
-		end)
         --[[
         game:GetService("RunService").RenderStepped:Connect(function()
             uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
@@ -368,6 +363,8 @@ function library:CreateWindow(name, size, hidebutton)
 	uis.InputBegan:Connect(function(key)
 		if key.KeyCode == window.hidebutton then
 			window.Frame.Visible = not window.Frame.Visible
+			library.cursor.Visible = not window.Frame.Visible
+			library.cursor1.Visible = not window.Frame.Visible
 		end
 	end)
 
