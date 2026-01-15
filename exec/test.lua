@@ -56,8 +56,8 @@ if library.theme.cursor and Drawing then
         uis.InputChanged:Connect(function(input)
             if uis.MouseEnabled then
                 if input.UserInputType == Enum.UserInputType.MouseMovement then
-					local mouses = uis:GetMouseLocation()
-					local Pos = Vector2.new(mouses.X, mouses.Y)
+					local ins = uis:GetMouseLocation()
+					local Pos = Vector2.new(ins.X, ins.Y)
                     library.cursor.Position = Vector2.new(input.Position.X - 32, input.Position.Y + 7)
 					library.cursor.PointA = Pos
 					library.cursor.PointB = Pos + Vector2.new(12, 12)
