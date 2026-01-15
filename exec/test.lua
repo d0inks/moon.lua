@@ -68,15 +68,18 @@ if library.theme.cursor and Drawing then
                 end
             end
         end)
+		RunService.RenderStepped:Connect(function()
+			local visible = not GuiService.MenuIsOpen
+			library.cursor.Visible = visible
+			library.cursor1.Visible = visible
+		end)
         --[[
         game:GetService("RunService").RenderStepped:Connect(function()
             uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
             library.cursor.Visible = uis.MouseEnabled and (uis.MouseIconEnabled or game:GetService("GuiService").MenuIsOpen)
         end)
 		]]--
-    local visible = not GuiService.MenuIsOpen
-    library.cursor.Visible = visible
-    library.cursor1.Visible = visible
+
     elseif not success and library.cursor then
         library.cursor:Remove()
 		library.cursor1:Remove()
