@@ -41,27 +41,29 @@ library.theme = {
 	itemscolor = Color3.fromRGB(200, 200, 200),
 	itemscolor2 = Color3.fromRGB(210, 210, 210),
 }
+
 if library.theme.cursor and Drawing then
     local success = pcall(function() 
-        library.cursor = Drawing.new("Triangle")
-        library.cursor.Color = library.theme.accentcolor -- triangle color
-        library.cursor.Filled = true
-        library.cursor.Thickness = 1
-        library.cursor.Visible = uis.MouseEnabled
-
-        local function updateTriangle(pos)
-            local size = 20 -- size of the triangle
-            library.cursor.PointA = Vector2.new(pos.X, pos.Y) -- tip
-            library.cursor.PointB = Vector2.new(pos.X - size/2, pos.Y + size) -- bottom left
-            library.cursor.PointC = Vector2.new(pos.X + size/2, pos.Y + size) -- bottom right
-        end
-
-        updateTriangle(Vector2.new(mouse.X, mouse.Y))
-        
+		library.cursor = Drawing.new("Triangle")
+		library.cursor.Color = Color3.fromRGB(180, 180, 180)
+		library.cursor.Transparency = 0.6
+		library.cursor1 = Drawing.new("Triangle")
+		library.cursor1.Color = olor3.fromRGB(240, 240, 240)
+		library.cursor1.Transparency = 0.6
+    end)
+    if success and library.cursor then
         uis.InputChanged:Connect(function(input)
             if uis.MouseEnabled then
                 if input.UserInputType == Enum.UserInputType.MouseMovement then
-                    updateTriangle(input.Position)
+					local mouses = inputService:GetMouseLocation()
+					local Pos = Vector2.new(mouses.X, mouses.Y)
+                    library.cursor.Position = Vector2.new(input.Position.X - 32, input.Position.Y + 7)
+					library.cursor.PointA = Pos
+					library.cursor.PointB = Pos + Vector2.new(12, 12)
+					library.cursor.PointC = Pos + Vector2.new(12, 12)
+					library.cursor1.PointA = Pos
+					library.cursor1.PointB = Pos + Vector2.new(11, 11)
+					library.cursor1.PointC = Pos + Vector2.new(11, 11)
                 end
             end
         end)
@@ -69,12 +71,10 @@ if library.theme.cursor and Drawing then
         game:GetService("RunService").RenderStepped:Connect(function()
             uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
             library.cursor.Visible = uis.MouseEnabled and (uis.MouseIconEnabled or game:GetService("GuiService").MenuIsOpen)
-            updateTriangle(Vector2.new(mouse.X, mouse.Y))
         end)
-    end)
-    
-    if not success and library.cursor then
+    elseif not success and library.cursor then
         library.cursor:Remove()
+		library.cursor1:Remove()
     end
 end
 
