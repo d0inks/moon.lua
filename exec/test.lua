@@ -363,8 +363,6 @@ function library:CreateWindow(name, size, hidebutton)
 	uis.InputBegan:Connect(function(key)
 		if key.KeyCode == window.hidebutton then
 			window.Frame.Visible = not window.Frame.Visible
-			library.cursor.Visible = not window.Frame.Visible
-			library.cursor1.Visible = not window.Frame.Visible
 		end
 	end)
 
