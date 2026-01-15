@@ -1,4 +1,5 @@
---cattoware ui!
+--cattoware ui! u may use this if you would like credit or no credit thats fine!
+--modded by doink/ 977787445351444550
 local library = {
 	flags = {},
 	items = {},
@@ -24,6 +25,7 @@ library.theme = {
 	font = Enum.Font.Code,
 	background = "rbxassetid://5553946656",
 	tilesize = 90,
+	cursor = true,
 	backgroundcolor = Color3.fromRGB(20, 20, 20),
 	tabstextcolor = Color3.fromRGB(240, 240, 240),
 	bordercolor = Color3.fromRGB(60, 60, 60),
@@ -41,6 +43,44 @@ library.theme = {
 	itemscolor = Color3.fromRGB(200, 200, 200),
 	itemscolor2 = Color3.fromRGB(210, 210, 210),
 }
+
+if library.theme.cursor and Drawing then
+    local success = pcall(function() 
+		library.cursor = Drawing.new("Triangle")
+		library.cursor.Color = Color3.fromRGB(180, 180, 180)
+		library.cursor.Transparency = 0.6
+		library.cursor.Filled = true
+		library.cursor1 = Drawing.new("Triangle")
+		library.cursor1.Color = Color3.fromRGB(240, 240, 240)
+		library.cursor1.Transparency = 0.6
+		library.curso1.Filled = true
+    end)
+    if success and library.cursor then
+        uis.InputChanged:Connect(function(input)
+            if uis.MouseEnabled then
+                if input.UserInputType == Enum.UserInputType.MouseMovement then
+					local ins = uis:GetMouseLocation()
+					local Pos = Vector2.new(ins.X, ins.Y)
+                    library.cursor.Position = Vector2.new(input.Position.X - 32, input.Position.Y + 7)
+					library.cursor.PointA = Pos
+					library.cursor.PointB = Pos + Vector2.new(12, 12)
+					library.cursor.PointC = Pos + Vector2.new(12, 12)
+					library.cursor1.PointA = Pos
+					library.cursor1.PointB = Pos + Vector2.new(11, 11)
+					library.cursor1.PointC = Pos + Vector2.new(11, 11)
+                end
+            end
+        end)
+        
+        game:GetService("RunService").RenderStepped:Connect(function()
+            uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
+            library.cursor.Visible = uis.MouseEnabled and (uis.MouseIconEnabled or game:GetService("GuiService").MenuIsOpen)
+        end)
+    elseif not success and library.cursor then
+        library.cursor:Remove()
+		library.cursor1:Remove()
+    end
+end
 
 function library:CreateWatermark(name, position)
 	local gamename = marketplaceservice:GetProductInfo(game.PlaceId).Name
