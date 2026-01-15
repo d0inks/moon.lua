@@ -3446,11 +3446,12 @@ function library:CreateWindow(name, size, hidebutton)
 								end
 							end
 							if isMatch then
-								if keybind.mode == "Toggle" then
+								if keybind.mode == "Hold" then
+									keybind._holding = true
+									pcall(keybind.callback, true)
+								elseif keybind.mode == "Toggle" then
 									keybind.toggled = not keybind.toggled
 									pcall(keybind.callback, keybind.toggled)
-								elseif keybind.mode == "Hold" then
-									pcall(keybind.callback, true)
 								end
 							end
 						end
@@ -3468,9 +3469,9 @@ function library:CreateWindow(name, size, hidebutton)
 							matched = input.UserInputType == keybind.value
 						end
 					end
-
 					if matched and keybind.mode == "Hold" then
-						pcall(keybind.callback, false)  -- released = false
+						keybind._holding = false
+						pcall(keybind.callback, false)
 					end
 				end)
 
