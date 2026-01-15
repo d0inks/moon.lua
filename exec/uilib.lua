@@ -13,7 +13,7 @@ local marketplaceservice = game:GetService("MarketplaceService")
 local textservice = game:GetService("TextService")
 local coregui = game:GetService("CoreGui")
 local httpservice = game:GetService("HttpService")
-
+local GuiService = game:GetService("GuiService")
 local player = players.LocalPlayer
 local mouse = player:GetMouse()
 local camera = game.Workspace.CurrentCamera
@@ -68,11 +68,13 @@ if library.theme.cursor and Drawing then
                 end
             end
         end)
-        
+        --[[
         game:GetService("RunService").RenderStepped:Connect(function()
             uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
             library.cursor.Visible = uis.MouseEnabled and (uis.MouseIconEnabled or game:GetService("GuiService").MenuIsOpen)
         end)
+		]]--
+
     elseif not success and library.cursor then
         library.cursor:Remove()
 		library.cursor1:Remove()
