@@ -49,11 +49,9 @@ if library.theme.cursor and Drawing then
 		library.cursor = Drawing.new("Triangle")
 		library.cursor.Color = Color3.fromRGB(180, 180, 180)
 		library.cursor.Transparency = 0.6
-		library.cursor.Filled = true
 		library.cursor1 = Drawing.new("Triangle")
 		library.cursor1.Color = Color3.fromRGB(240, 240, 240)
 		library.cursor1.Transparency = 0.6
-		library.curso1.Filled = true
     end)
     if success and library.cursor then
         uis.InputChanged:Connect(function(input)
