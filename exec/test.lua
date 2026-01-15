@@ -52,7 +52,7 @@ if library.theme.cursor and Drawing then
 		library.cursor1 = Drawing.new("Triangle")
 		library.cursor1.Color = Color3.fromRGB(240, 240, 240)
 		library.cursor1.Transparency = 0.6
-		library.curso1.Filled = true
+		library.cursor1.Filled = true
     end)
     if success and library.cursor then
         uis.InputChanged:Connect(function(input)
@@ -3221,7 +3221,6 @@ function library:CreateWindow(name, size, hidebutton)
 
 			function sector:AddKeybind(text, ModeType, default, newkeycallback, callback, flag)
 				local keybind = {}
-				keybind.binding = false
 				local KeyModes = {
 					"Hold",
 					"Toggle",
@@ -3305,11 +3304,9 @@ function library:CreateWindow(name, size, hidebutton)
 				keybind.Bind.TextSize = 15
 				keybind.Bind.TextXAlignment = Enum.TextXAlignment.Right
 				keybind.Bind.MouseButton1Down:Connect(function()
-					keybind.binding = true
 					keybind.Bind.Text = "[...]"
 					keybind.Bind.TextColor3 = window.theme.accentcolor
 				end)
-
 				keybind.Bind.MouseButton2Down:Connect(function()
 					ShowKeyModes()
 				end)
@@ -3397,31 +3394,49 @@ function library:CreateWindow(name, size, hidebutton)
 				end
 
 				uis.InputBegan:Connect(function(input, gameProcessed)
-					if gameProcessed and not keybind.binding then
+					if gameProcessed then
 						return
 					end
-				if keybind.Bind.Text == "[...]" then
-					keybind.Bind.TextColor3 = Color3.fromRGB(136, 136, 136)
-
-					if input.UserInputType == Enum.UserInputType.Keyboard then
-						keybind:Set(input.KeyCode)
-
-					elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
-						keybind:Set(Enum.UserInputType.MouseButton1)
-
-					elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
-						keybind:Set(Enum.UserInputType.MouseButton2)
-
-					elseif input.UserInputType == Enum.UserInputType.MouseButton3 then
-						keybind:Set(Enum.UserInputType.MouseButton3)
-
-					else
-						keybind:Set("None")
+					if keybind.Bind.Text == "[...]" then
+						local key
+						keybind.Bind.TextColor3 = Color3.fromRGB(136, 136, 136)
+						if input.UserInputType == Enum.UserInputType.Keyboard then
+							keybind:Set(input.KeyCode)
+						elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
+							key = Enum.UserInputType.MouseButton1
+							keybind:Set(key)
+						elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
+							key = Enum.UserInputType.MouseButton2
+							keybind:Set(key)
+						elseif input.UserInputType == Enum.UserInputType.MouseButton3 then
+							key = Enum.UserInputType.MouseButton3
+							keybind:Set(key)
+						else
+							keybind:Set("None")
+						end
+						if keybind.value ~= "None" then
+							local isMatch = false
+							if typeof(keybind.value) == "EnumItem" then
+								if keybind.value.EnumType == Enum.KeyCode then
+									if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == keybind.value then
+										isMatch = true
+									end
+								elseif keybind.value.EnumType == Enum.UserInputType then
+									if input.UserInputType == keybind.value then
+										isMatch = true
+									end
+								end
+							end
+							if isMatch then
+								if keybind.mode == "Toggle" then
+									keybind.toggled = not keybind.toggled
+									pcall(keybind.callback, keybind.toggled)
+								elseif keybind.mode == "Hold" then
+									pcall(keybind.callback, true)
+								end
+							end
+						end
 					end
-
-					keybind.binding = false
-				end
-
 				end)
 
 				uis.InputEnded:Connect(function(input, gameProcessed)
