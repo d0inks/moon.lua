@@ -24,6 +24,7 @@ library.theme = {
 	font = Enum.Font.Code,
 	background = "rbxassetid://5553946656",
 	tilesize = 90,
+	cursor,
 	backgroundcolor = Color3.fromRGB(20, 20, 20),
 	tabstextcolor = Color3.fromRGB(240, 240, 240),
 	bordercolor = Color3.fromRGB(60, 60, 60),
@@ -42,7 +43,7 @@ library.theme = {
 	itemscolor2 = Color3.fromRGB(210, 210, 210),
 }
 
-if library.theme.cursor and Drawing then
+if library.theme.cursor then
     local success = pcall(function() 
 		library.cursor = Drawing.new("Triangle")
 		library.cursor.Color = Color3.fromRGB(180, 180, 180)
