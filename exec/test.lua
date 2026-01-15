@@ -24,7 +24,7 @@ library.theme = {
 	font = Enum.Font.Code,
 	background = "rbxassetid://5553946656",
 	tilesize = 90,
-	cursor,
+	cursor = true,
 	backgroundcolor = Color3.fromRGB(20, 20, 20),
 	tabstextcolor = Color3.fromRGB(240, 240, 240),
 	bordercolor = Color3.fromRGB(60, 60, 60),
