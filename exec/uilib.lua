@@ -60,8 +60,8 @@ if library.theme.cursor and Drawing then
 					local Pos = Vector2.new(ins.X, ins.Y)
                     library.cursor.Position = Vector2.new(input.Position.X - 32, input.Position.Y + 7)
 					library.cursor.PointA = Pos
-					library.cursor.PointB = Pos + Vector2.new(12, 12)
-					library.cursor.PointC = Pos + Vector2.new(12, 12)
+					library.cursor.PointB = Pos + Vector2.new(14, 14)
+					library.cursor.PointC = Pos + Vector2.new(14, 14)
 					library.cursor1.PointA = Pos
 					library.cursor1.PointB = Pos + Vector2.new(11, 11)
 					library.cursor1.PointC = Pos + Vector2.new(11, 11)
