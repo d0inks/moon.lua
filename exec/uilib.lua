@@ -48,11 +48,9 @@ if library.theme.cursor and Drawing then
 		library.cursor = Drawing.new("Triangle")
 		library.cursor.Color = Color3.fromRGB(180, 180, 180)
 		library.cursor.Transparency = 0.6
-		library.cursor.Filled = true
 		library.cursor1 = Drawing.new("Triangle")
 		library.cursor1.Color = Color3.fromRGB(240, 240, 240)
 		library.cursor1.Transparency = 0.6
-		library.cursor1.Filled = true
     end)
     if success and library.cursor then
         uis.InputChanged:Connect(function(input)
@@ -1053,10 +1051,31 @@ function library:CreateWindow(name, size, hidebutton)
 						["RightControl"] = "RCTRL",
 						["LeftAlt"] = "LALT",
 						["RightAlt"] = "RALT",
+						["MouseButton1"] = "M1",
+						["MouseButton2"] = "M2",
+						["MouseButton3"] = "M3",
 					}
+					local function getDisplayName(value)
+						if value == "None" then
+							return "None"
+						end
 
-					local text = keybind.default == "None" and "[None]"
-						or "[" .. (shorter_keycodes[keybind.default.Name] or keybind.default.Name) .. "]"
+						if typeof(value) == "EnumItem" then
+							if value.EnumType == Enum.KeyCode then
+								return value.Name
+							elseif value.EnumType == Enum.UserInputType then
+								if value == Enum.UserInputType.MouseButton1 then
+									return "MouseButton1"
+								elseif value == Enum.UserInputType.MouseButton2 then
+									return "MouseButton2"
+								elseif value == Enum.UserInputType.MouseButton3 then
+									return "MouseButton3"
+								end
+							end
+						end
+						return tostring(value)
+					end
+					local text = keybind.default == "None" and "[None]" or "[" .. (shorter_keycodes[keybind.default.Name] or keybind.default.Name) .. "]"
 					local size = textservice:GetTextSize(text, 15, window.theme.font, Vector2.new(2000, 2000))
 
 					keybind.Main = Instance.new("TextButton", toggle.Items)
