@@ -3498,7 +3498,7 @@ function library:CreateWindow(name, size, hidebutton)
 							pcall(keybind.callback, keybind.toggled)
 
 						elseif keybind.mode == "Hold" then
-							pcall(keybind.callback, true)
+							pcall(keybind.callback, false)
 						end
 					end)
 
