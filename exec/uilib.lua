@@ -3280,7 +3280,6 @@ function library:CreateWindow(name, size, hidebutton)
 
 						btn.MouseButton1Click:Connect(function()
 							keybind.mode = modeName
-							print(keybind.mode)
 							modePopup:Destroy()
 							modePopup = nil
 						end)
@@ -3458,32 +3457,51 @@ function library:CreateWindow(name, size, hidebutton)
 					end
 				end)
 
-				uis.InputEnded:Connect(function(input, gameProcessed)
-					if gameProcessed then
-						return
-					end
-					if keybind.mode == "Hold" and keybind.value ~= "None" then
-						local isMatch = false
+					uis.InputBegan:Connect(function(input, gameProcessed)
+						if gameProcessed then return end
+
+						-- REBIND MODE
+						if keybind.Bind.Text == "[...]" then
+							keybind.Bind.TextColor3 = Color3.fromRGB(136, 136, 136)
+
+							if input.UserInputType == Enum.UserInputType.Keyboard then
+								keybind:Set(input.KeyCode)
+							elseif input.UserInputType == Enum.UserInputType.MouseButton1 then
+								keybind:Set(Enum.UserInputType.MouseButton1)
+							elseif input.UserInputType == Enum.UserInputType.MouseButton2 then
+								keybind:Set(Enum.UserInputType.MouseButton2)
+							elseif input.UserInputType == Enum.UserInputType.MouseButton3 then
+								keybind:Set(Enum.UserInputType.MouseButton3)
+							else
+								keybind:Set("None")
+							end
+
+							return
+						end
+						if keybind.value == "None" then return end
+
+						local matched = false
+
 						if typeof(keybind.value) == "EnumItem" then
 							if keybind.value.EnumType == Enum.KeyCode then
-								if
-									input.UserInputType == Enum.UserInputType.Keyboard
+								matched = input.UserInputType == Enum.UserInputType.Keyboard
 									and input.KeyCode == keybind.value
-								then
-									isMatch = true
-								end
 							elseif keybind.value.EnumType == Enum.UserInputType then
-								if input.UserInputType == keybind.value then
-									isMatch = true
-								end
+								matched = input.UserInputType == keybind.value
 							end
 						end
 
-						if isMatch then
-							pcall(keybind.callback, false)
+						if not matched then return end
+
+						if keybind.mode == "Toggle" then
+							keybind.toggled = not keybind.toggled
+							pcall(keybind.callback, keybind.toggled)
+
+						elseif keybind.mode == "Hold" then
+							pcall(keybind.callback, true)
 						end
-					end
-				end)
+					end)
+
 
 				game:GetService("RunService").RenderStepped:Connect(function()
 					if keybind.mode == "Always" and keybind.value ~= "None" then
