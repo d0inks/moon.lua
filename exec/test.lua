@@ -74,6 +74,8 @@ if library.theme.cursor and Drawing then
             library.cursor.Visible = uis.MouseEnabled and (uis.MouseIconEnabled or game:GetService("GuiService").MenuIsOpen)
         end)
 		]]--
+	library.cursor.Visible = not game:GetService("GuiService").MenuIsOpen
+	library.cursor1.Visible = not game:GetService("GuiService").MenuIsOpen
     elseif not success and library.cursor then
         library.cursor:Remove()
 		library.cursor1:Remove()
