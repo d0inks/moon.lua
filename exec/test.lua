@@ -43,61 +43,55 @@ library.theme = {
 	itemscolor2 = Color3.fromRGB(210, 210, 210),
 }
 
-if library.theme.cursor and Drawing then
-    local success = pcall(function() 
-        library.cursor = Drawing.new("Triangle")
-        library.cursor.Color = Color3.fromRGB(180, 180, 180)
-        library.cursor.Transparency = 1
-        library.cursor.Thickness = 1
-        library.cursor.Filled = true
-        library.cursor.Visible = false
+			if library.theme.cursor and Drawing then
+				local success, err = pcall(function() 
+					library.cursor = Drawing.new("Triangle")
+					library.cursor.Color = Color3.fromRGB(180, 180, 180)
+					library.cursor.Transparency = 1
+					library.cursor.Thickness = 1
+					library.cursor.Filled = true
 
-        library.cursor1 = Drawing.new("Triangle")
-        library.cursor1.Color = Color3.fromRGB(240, 240, 240)
-        library.cursor1.Transparency = 1
-        library.cursor1.Thickness = 1
-        library.cursor1.Filled = true
-        library.cursor1.Visible = false
-    end)
+					library.cursor1 = Drawing.new("Triangle")
+					library.cursor1.Color = Color3.fromRGB(240, 240, 240)
+					library.cursor1.Transparency = 1
+					library.cursor1.Thickness = 1
+					library.cursor1.Filled = true
+				end)
 
-    if success and library.cursor then
-        -- Handle Cursor Movement
-        uis.InputChanged:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseMovement then
-                local Pos = uis:GetMouseLocation()
-                
-                library.cursor.PointA = Pos
-                library.cursor.PointB = Pos + Vector2.new(14, 14)
-                library.cursor.PointC = Pos + Vector2.new(6, 18)
-                
-                library.cursor1.PointA = Pos
-                library.cursor1.PointB = Pos + Vector2.new(11, 11)
-                library.cursor1.PointC = Pos + Vector2.new(5, 14)
-            end
-        end)
+				if success and library.cursor then
+					-- Handle Movement
+					uis.InputChanged:Connect(function(input)
+						if input.UserInputType == Enum.UserInputType.MouseMovement then
+							local Pos = uis:GetMouseLocation()
+							library.cursor.PointA = Pos
+							library.cursor.PointB = Pos + Vector2.new(14, 14)
+							library.cursor.PointC = Pos + Vector2.new(6, 18)
+							library.cursor1.PointA = Pos
+							library.cursor1.PointB = Pos + Vector2.new(11, 11)
+							library.cursor1.PointC = Pos + Vector2.new(5, 14)
+						end
+					end)
 
-        -- The "First Person" Fix Loop
-        runservice.RenderStepped:Connect(function()
-            -- We find the main frame dynamically
-            local menuFrame = library.items[1] and library.items[1].Frame
-            local menuOpen = menuFrame and menuFrame.Visible
+					-- Handle Visibility & Unlocking (Fix for First Person)
+					runservice.RenderStepped:Connect(function()
+						-- Locate the main frame of the first window created
+						local mainFrame = getgenv().uilib and getgenv().uilib:FindFirstChild("main")
+						local isVisible = mainFrame and mainFrame.Visible or false
 
-            if menuOpen then
-                -- FORCE unlock and show
-                uis.MouseBehavior = Enum.MouseBehavior.Default
-                uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
-                library.cursor.Visible = true
-                library.cursor1.Visible = true
-            else
-                -- Restore first person behavior
-                library.cursor.Visible = false
-                library.cursor1.Visible = false
-                -- We don't force MouseBehavior to LockCenter here 
-                -- because the game usually handles that itself.
-            end
-        end)
-    end
-end
+						library.cursor.Visible = isVisible
+						library.cursor1.Visible = isVisible
+
+						if isVisible then
+							-- This forces the mouse to stay unlocked while the menu is open
+							uis.MouseBehavior = Enum.MouseBehavior.Default 
+							uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
+						else
+							-- Returns control to the game when menu is closed
+							uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None
+						end
+					end)
+				end
+			end
 
 function library:CreateWatermark(name, position)
 	local gamename = marketplaceservice:GetProductInfo(game.PlaceId).Name
