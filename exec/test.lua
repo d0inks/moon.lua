@@ -47,21 +47,23 @@ if library.theme.cursor and Drawing then
     local success = pcall(function() 
         library.cursor = Drawing.new("Triangle")
         library.cursor.Color = Color3.fromRGB(180, 180, 180)
-        library.cursor.Transparency = 0.6
+        library.cursor.Transparency = 1
         library.cursor.Thickness = 1
         library.cursor.Filled = true
-        
+        library.cursor.Visible = false
+
         library.cursor1 = Drawing.new("Triangle")
         library.cursor1.Color = Color3.fromRGB(240, 240, 240)
-        library.cursor1.Transparency = 0.6
+        library.cursor1.Transparency = 1
         library.cursor1.Thickness = 1
         library.cursor1.Filled = true
+        library.cursor1.Visible = false
     end)
 
     if success and library.cursor then
         -- Handle Cursor Movement
         uis.InputChanged:Connect(function(input)
-            if uis.MouseEnabled and input.UserInputType == Enum.UserInputType.MouseMovement then
+            if input.UserInputType == Enum.UserInputType.MouseMovement then
                 local Pos = uis:GetMouseLocation()
                 
                 library.cursor.PointA = Pos
@@ -74,28 +76,26 @@ if library.theme.cursor and Drawing then
             end
         end)
 
-        -- Handle Visibility and Unlocking
+        -- The "First Person" Fix Loop
         runservice.RenderStepped:Connect(function()
-            -- Check if the main window exists and is visible
-            local menuOpen = (window and window.Frame and window.Frame.Visible)
-            
-            -- 1. Toggle custom cursor visibility based on menu state
-            library.cursor.Visible = menuOpen
-            library.cursor1.Visible = menuOpen
-            
-            -- 2. Force hide the default Roblox cursor when menu is open
+            -- We find the main frame dynamically
+            local menuFrame = library.items[1] and library.items[1].Frame
+            local menuOpen = menuFrame and menuFrame.Visible
+
             if menuOpen then
+                -- FORCE unlock and show
+                uis.MouseBehavior = Enum.MouseBehavior.Default
                 uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
-                uis.MouseBehavior = Enum.MouseBehavior.Default -- Unlocks the cursor
+                library.cursor.Visible = true
+                library.cursor1.Visible = true
             else
-                uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None
-                -- Optional: uis.MouseBehavior = Enum.MouseBehavior.LockCenter 
+                -- Restore first person behavior
+                library.cursor.Visible = false
+                library.cursor1.Visible = false
+                -- We don't force MouseBehavior to LockCenter here 
+                -- because the game usually handles that itself.
             end
         end)
-
-    elseif not success and library.cursor then
-        library.cursor:Remove()
-        library.cursor1:Remove()
     end
 end
 
