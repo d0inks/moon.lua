@@ -3404,8 +3404,7 @@ function library:CreateWindow(name, size, hidebutton)
 						Vector2.new(2000, 2000)
 					)
 					keybind.Bind.Size = UDim2.fromOffset(size.X, size.Y)
-					keybind.Bind.Position =
-						UDim2.fromOffset(sector.Main.Size.X.Offset - 10 - keybind.Bind.AbsoluteSize.X, 0)
+					keybind.Bind.Position = UDim2.fromOffset(sector.Main.Size.X.Offset - 10 - keybind.Bind.AbsoluteSize.X, 0)
 					if keybind.flag and keybind.flag ~= "" then
 						library.flags[keybind.flag] = value
 					end
