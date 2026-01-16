@@ -42,44 +42,25 @@ library.theme = {
 	itemscolor = Color3.fromRGB(200, 200, 200),
 	itemscolor2 = Color3.fromRGB(210, 210, 210),
 }
+library.opened = true
+runservice.RenderStepped:Connect(function()
+    if library.opened then
+        uis.MouseBehavior = Enum.MouseBehavior.Default
+        if library.cursor and library.cursor1 then
+            local menuOpen = GuiService.MenuIsOpen
+            library.cursor.Visible = true
+            library.cursor1.Visible = true
 
-if library.theme.cursor and Drawing then
-    local success = pcall(function() 
-		library.cursor = Drawing.new("Triangle")
-		library.cursor.Color = Color3.fromRGB(180, 180, 180)
-		library.cursor.Transparency = 0.6
-		library.cursor1 = Drawing.new("Triangle")
-		library.cursor1.Color = Color3.fromRGB(240, 240, 240)
-		library.cursor1.Transparency = 0.6
-    end)
-    if success and library.cursor then
-        uis.InputChanged:Connect(function(input)
-            if uis.MouseEnabled then
-                if input.UserInputType == Enum.UserInputType.MouseMovement then
-					local ins = uis:GetMouseLocation()
-					local Pos = Vector2.new(ins.X, ins.Y)
-                    library.cursor.Position = Vector2.new(input.Position.X - 32, input.Position.Y + 7)
-					library.cursor.PointA = Pos
-					library.cursor.PointB = Pos + Vector2.new(14, 14)
-					library.cursor.PointC = Pos + Vector2.new(14, 14)
-					library.cursor1.PointA = Pos
-					library.cursor1.PointB = Pos + Vector2.new(11, 11)
-					library.cursor1.PointC = Pos + Vector2.new(11, 11)
-                end
-            end
-        end)
-        --[[
-        game:GetService("RunService").RenderStepped:Connect(function()
-            uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
-            library.cursor.Visible = uis.MouseEnabled and (uis.MouseIconEnabled or game:GetService("GuiService").MenuIsOpen)
-        end)
-		]]--
-
-    elseif not success and library.cursor then
-        library.cursor:Remove()
-		library.cursor1:Remove()
+            uis.MouseIconEnabled = false 
+        end
+    else
+        uis.MouseIconEnabled = true
+        if library.cursor then
+            library.cursor.Visible = false
+            library.cursor1.Visible = false
+        end
     end
-end
+end)
 
 function library:CreateWatermark(name, position)
 	local gamename = marketplaceservice:GetProductInfo(game.PlaceId).Name
