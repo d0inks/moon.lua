@@ -70,7 +70,7 @@ if library.theme.cursor and Drawing then
             end
         end)
         runservice.RenderStepped:Connect(function()
-            local main = coregui:FindFirstChild("millionware.vip v500"):WaitForChild("main")
+            local main = coregui:WaitForChild("millionware.vip v500"):WaitForChild("main")
             local isVisible = main.Visible
 
             library.cursor.Visible = isVisible
