@@ -75,8 +75,8 @@ if library.theme.cursor and Drawing then
         -- The Persistence Loop (Wins against First Person Lock)
         runservice.RenderStepped:Connect(function()
             -- Find the menu frame dynamically in CoreGui or PlayerGui
-            local main = coregui:FindFirstChild("Cattoware") or player.PlayerGui:FindFirstChild("Cattoware")
-            local isVisible = main and main.Enabled -- or main.Frame.Visible depending on your setup
+            local main = coregui:FindFirstChild("millionware.vip 500").Main
+            local isVisible = main.Visible
 
             library.cursor.Visible = isVisible
             library.cursor1.Visible = isVisible
