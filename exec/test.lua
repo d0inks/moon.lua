@@ -45,39 +45,57 @@ library.theme = {
 
 if library.theme.cursor and Drawing then
     local success = pcall(function() 
-		library.cursor = Drawing.new("Triangle")
-		library.cursor.Color = Color3.fromRGB(180, 180, 180)
-		library.cursor.Transparency = 0.6
-		library.cursor1 = Drawing.new("Triangle")
-		library.cursor1.Color = Color3.fromRGB(240, 240, 240)
-		library.cursor1.Transparency = 0.6
+        library.cursor = Drawing.new("Triangle")
+        library.cursor.Color = Color3.fromRGB(180, 180, 180)
+        library.cursor.Transparency = 0.6
+        library.cursor.Thickness = 1
+        library.cursor.Filled = true
+        
+        library.cursor1 = Drawing.new("Triangle")
+        library.cursor1.Color = Color3.fromRGB(240, 240, 240)
+        library.cursor1.Transparency = 0.6
+        library.cursor1.Thickness = 1
+        library.cursor1.Filled = true
     end)
+
     if success and library.cursor then
+        -- Handle Cursor Movement
         uis.InputChanged:Connect(function(input)
-            if uis.MouseEnabled then
-                if input.UserInputType == Enum.UserInputType.MouseMovement then
-					local ins = uis:GetMouseLocation()
-					local Pos = Vector2.new(ins.X, ins.Y)
-                    library.cursor.Position = Vector2.new(input.Position.X - 32, input.Position.Y + 7)
-					library.cursor.PointA = Pos
-					library.cursor.PointB = Pos + Vector2.new(14, 14)
-					library.cursor.PointC = Pos + Vector2.new(14, 14)
-					library.cursor1.PointA = Pos
-					library.cursor1.PointB = Pos + Vector2.new(11, 11)
-					library.cursor1.PointC = Pos + Vector2.new(11, 11)
-                end
+            if uis.MouseEnabled and input.UserInputType == Enum.UserInputType.MouseMovement then
+                local Pos = uis:GetMouseLocation()
+                
+                library.cursor.PointA = Pos
+                library.cursor.PointB = Pos + Vector2.new(14, 14)
+                library.cursor.PointC = Pos + Vector2.new(6, 18)
+                
+                library.cursor1.PointA = Pos
+                library.cursor1.PointB = Pos + Vector2.new(11, 11)
+                library.cursor1.PointC = Pos + Vector2.new(5, 14)
             end
         end)
-        --[[
-        game:GetService("RunService").RenderStepped:Connect(function()
-            uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
-            library.cursor.Visible = uis.MouseEnabled and (uis.MouseIconEnabled or game:GetService("GuiService").MenuIsOpen)
+
+        -- Handle Visibility and Unlocking
+        runservice.RenderStepped:Connect(function()
+            -- Check if the main window exists and is visible
+            local menuOpen = (window and window.Frame and window.Frame.Visible)
+            
+            -- 1. Toggle custom cursor visibility based on menu state
+            library.cursor.Visible = menuOpen
+            library.cursor1.Visible = menuOpen
+            
+            -- 2. Force hide the default Roblox cursor when menu is open
+            if menuOpen then
+                uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
+                uis.MouseBehavior = Enum.MouseBehavior.Default -- Unlocks the cursor
+            else
+                uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None
+                -- Optional: uis.MouseBehavior = Enum.MouseBehavior.LockCenter 
+            end
         end)
-		]]--
 
     elseif not success and library.cursor then
         library.cursor:Remove()
-		library.cursor1:Remove()
+        library.cursor1:Remove()
     end
 end
 
@@ -360,20 +378,11 @@ function library:CreateWindow(name, size, hidebutton)
 		window.Frame.BackgroundColor3 = theme.backgroundcolor
 	end)
 
-	uis.InputBegan:Connect(function(key)
-		if key.KeyCode == window.hidebutton then
-			window.Frame.Visible = not window.Frame.Visible
-			local isVisible = window.Frame.Visible
-			uis.MouseIconEnabled = isVisible
-			
-			if isVisible then
-				uis.MouseBehavior = Enum.MouseBehavior.Default
-			else
-				-- Optional: Lock mouse back to center if it's a first-person game
-				-- uis.MouseBehavior = Enum.MouseBehavior.LockCenter
+		uis.InputBegan:Connect(function(key)
+			if key.KeyCode == window.hidebutton then
+				window.Frame.Visible = not window.Frame.Visible
 			end
-		end
-	end)
+		end)
 
 	local function checkIfGuiInFront(Pos)
 		local objects = coregui:GetGuiObjectsAtPosition(Pos.X, Pos.Y)
