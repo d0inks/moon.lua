@@ -17,7 +17,6 @@ local GuiService = game:GetService("GuiService")
 local player = players.LocalPlayer
 local mouse = player:GetMouse()
 local camera = game.Workspace.CurrentCamera
-
 library.theme = {
 	fontsize = 15,
 	titlesize = 18,
@@ -45,41 +44,29 @@ library.theme = {
 
 if library.theme.cursor and Drawing then
     local success = pcall(function() 
-		library.cursor = Drawing.new("Triangle")
-		library.cursor.Color = Color3.fromRGB(180, 180, 180)
-		library.cursor.Transparency = 0.6
-		library.cursor1 = Drawing.new("Triangle")
-		library.cursor1.Color = Color3.fromRGB(240, 240, 240)
-		library.cursor1.Transparency = 0.6
+        library.cursor = Drawing.new("Triangle")
+        library.cursor.Color = Color3.fromRGB(180, 180, 180)
+        library.cursor.Transparency = 1
+        library.cursor.Thickness = 1
+        library.cursor.Filled = true
+        library.cursor1 = Drawing.new("Triangle")
+        library.cursor1.Color = Color3.fromRGB(240, 240, 240)
+        library.cursor1.Transparency = 1
+        library.cursor1.Thickness = 1
+        library.cursor1.Filled = true
     end)
     if success and library.cursor then
         uis.InputChanged:Connect(function(input)
-            if uis.MouseEnabled then
-                if input.UserInputType == Enum.UserInputType.MouseMovement then
-					local ins = uis:GetMouseLocation()
-					local Pos = Vector2.new(ins.X, ins.Y)
-                    library.cursor.Position = Vector2.new(input.Position.X - 32, input.Position.Y + 7)
-					library.cursor.PointA = Pos
-					library.cursor.PointB = Pos + Vector2.new(14, 14)
-					library.cursor.PointC = Pos + Vector2.new(14, 14)
-					library.cursor1.PointA = Pos
-					library.cursor1.PointB = Pos + Vector2.new(11, 11)
-					library.cursor1.PointC = Pos + Vector2.new(11, 11)
-                end
+            if input.UserInputType == Enum.UserInputType.MouseMovement then
+                local Pos = uis:GetMouseLocation()
+                library.cursor.PointA = Pos
+                library.cursor.PointB = Pos + Vector2.new(14, 14)
+                library.cursor.PointC = Pos + Vector2.new(6, 18)
+                library.cursor1.PointA = Pos
+                library.cursor1.PointB = Pos + Vector2.new(11, 11)
+                library.cursor1.PointC = Pos + Vector2.new(5, 14)
             end
         end)
-		library.cursor.Visible = true
-		library.cursor1.Visible = true
-        --[[
-        game:GetService("RunService").RenderStepped:Connect(function()
-            uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
-            library.cursor.Visible = uis.MouseEnabled and (uis.MouseIconEnabled or game:GetService("GuiService").MenuIsOpen)
-        end)
-		]]--
-
-    elseif not success and library.cursor then
-        library.cursor:Remove()
-		library.cursor1:Remove()
     end
 end
 
@@ -362,11 +349,27 @@ function library:CreateWindow(name, size, hidebutton)
 		window.Frame.BackgroundColor3 = theme.backgroundcolor
 	end)
 
-	uis.InputBegan:Connect(function(key)
-		if key.KeyCode == window.hidebutton then
-			window.Frame.Visible = not window.Frame.Visible
-		end
-	end)
+		uis.InputBegan:Connect(function(key)
+			if key.KeyCode == window.hidebutton then
+				window.Frame.Visible = not window.Frame.Visible
+			end
+		end)
+		runservice.Heartbeat:Connect(function()
+            local gui = coregui:WaitForChild(window.name)
+            local main = gui and gui:WaitForChild("main")
+            local isVisible = main and main.Visible or false
+            library.cursor.Visible = isVisible
+            library.cursor1.Visible = isVisible
+            if isVisible then
+                uis.MouseBehavior = Enum.MouseBehavior.Default
+                uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
+                game:GetService("GuiService").SelectedObject = nil
+            else
+                if uis.OverrideMouseIconBehavior == Enum.OverrideMouseIconBehavior.ForceHide then
+                    uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None
+                end
+            end
+        end)
 
 	local function checkIfGuiInFront(Pos)
 		local objects = coregui:GetGuiObjectsAtPosition(Pos.X, Pos.Y)
@@ -3401,8 +3404,7 @@ function library:CreateWindow(name, size, hidebutton)
 						Vector2.new(2000, 2000)
 					)
 					keybind.Bind.Size = UDim2.fromOffset(size.X, size.Y)
-					keybind.Bind.Position =
-						UDim2.fromOffset(sector.Main.Size.X.Offset - 10 - keybind.Bind.AbsoluteSize.X, 0)
+					keybind.Bind.Position = UDim2.fromOffset(sector.Main.Size.X.Offset - 10 - keybind.Bind.AbsoluteSize.X, 0)
 					if keybind.flag and keybind.flag ~= "" then
 						library.flags[keybind.flag] = value
 					end
