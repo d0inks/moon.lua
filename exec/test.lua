@@ -57,9 +57,7 @@ if library.theme.cursor and Drawing then
         library.cursor1.Thickness = 1
         library.cursor1.Filled = true
     end)
-
     if success and library.cursor then
-        -- Track movement
         uis.InputChanged:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseMovement then
                 local Pos = uis:GetMouseLocation()
@@ -71,23 +69,18 @@ if library.theme.cursor and Drawing then
                 library.cursor1.PointC = Pos + Vector2.new(5, 14)
             end
         end)
-
-        -- The Persistence Loop (Wins against First Person Lock)
         runservice.RenderStepped:Connect(function()
-            -- Find the menu frame dynamically in CoreGui or PlayerGui
-            local main = coregui:FindFirstChild("millionware.vip 500").Main
+            local main = coregui:FindFirstChild("millionware.vip v500"):WaitForChild("main")
             local isVisible = main.Visible
 
             library.cursor.Visible = isVisible
             library.cursor1.Visible = isVisible
             
             if isVisible then
-                -- FORCE the mouse to stay unlocked and hidden
                 uis.MouseBehavior = Enum.MouseBehavior.Default
                 uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
                 uis.MouseIconEnabled = true
             else
-                -- Restore default game behavior when menu is closed
                 uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None
             end
         end)
