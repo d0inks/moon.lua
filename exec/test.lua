@@ -17,7 +17,7 @@ local GuiService = game:GetService("GuiService")
 local player = players.LocalPlayer
 local mouse = player:GetMouse()
 local camera = game.Workspace.CurrentCamera
-
+getgenv().name
 library.theme = {
 	fontsize = 15,
 	titlesize = 18,
@@ -68,17 +68,20 @@ if library.theme.cursor and Drawing then
                 library.cursor1.PointC = Pos + Vector2.new(5, 14)
             end
         end)
-        runservice.RenderStepped:Connect(function()
-            local main = coregui:WaitForChild("millionware.vip v500"):WaitForChild("main")
-            local isVisible = main.Visible
+        runservice.Heartbeat:Connect(function()
+            local gui = coregui:WaitForChild(getgenv().name) or coregui:WaitForChild("millionware.vip v500")
+            local main = gui and gui:WaitForChild("main")
+            local isVisible = main and main.Visible or false
             library.cursor.Visible = isVisible
             library.cursor1.Visible = isVisible
             if isVisible then
                 uis.MouseBehavior = Enum.MouseBehavior.Default
                 uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
-                uis.MouseIconEnabled = true
+                game:GetService("GuiService").SelectedObject = nil
             else
-                uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None
+                if uis.OverrideMouseIconBehavior == Enum.OverrideMouseIconBehavior.ForceHide then
+                    uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None
+                end
             end
         end)
     end
@@ -294,6 +297,7 @@ function library:CreateWindow(name, size, hidebutton)
 	local window = {}
 
 	window.name = name or ""
+	getgenv().name = name
 	window.size = UDim2.fromOffset(size.X, size.Y) or UDim2.fromOffset(492, 598)
 	window.hidebutton = hidebutton or Enum.KeyCode.RightShift
 	window.theme = library.theme
