@@ -50,7 +50,6 @@ if library.theme.cursor and Drawing then
         library.cursor.Transparency = 1
         library.cursor.Thickness = 1
         library.cursor.Filled = true
-        
         library.cursor1 = Drawing.new("Triangle")
         library.cursor1.Color = Color3.fromRGB(240, 240, 240)
         library.cursor1.Transparency = 1
@@ -72,10 +71,8 @@ if library.theme.cursor and Drawing then
         runservice.RenderStepped:Connect(function()
             local main = coregui:WaitForChild("millionware.vip v500"):WaitForChild("main")
             local isVisible = main.Visible
-
             library.cursor.Visible = isVisible
             library.cursor1.Visible = isVisible
-            
             if isVisible then
                 uis.MouseBehavior = Enum.MouseBehavior.Default
                 uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
