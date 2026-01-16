@@ -341,12 +341,25 @@ function library:CreateWindow(name, size, hidebutton)
 		window.Frame.BackgroundColor3 = theme.backgroundcolor
 	end)
 
-	uis.InputBegan:Connect(function(key)
-		if key.KeyCode == window.hidebutton then
-			window.Frame.Visible = not window.Frame.Visible
-			library.opened = not window.Frame.Visible
-		end
-	end)
+uis.InputBegan:Connect(function(key)
+    if key.KeyCode == window.hidebutton then
+        -- Toggle the visibility
+        local isNowVisible = not window.Frame.Visible
+        window.Frame.Visible = isNowVisible
+        
+        -- Sync the library state with visibility
+        library.opened = isNowVisible
+        
+        -- Optional: Force the mouse to show immediately when opening
+        if isNowVisible then
+            uis.MouseBehavior = Enum.MouseBehavior.Default
+            uis.MouseIconEnabled = false -- Hide default to show your custom one
+        else
+            uis.MouseBehavior = Enum.MouseBehavior.LockCenter
+            uis.MouseIconEnabled = true
+        end
+    end
+end)
 
 	local function checkIfGuiInFront(Pos)
 		local objects = coregui:GetGuiObjectsAtPosition(Pos.X, Pos.Y)
