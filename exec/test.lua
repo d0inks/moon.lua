@@ -67,22 +67,6 @@ if library.theme.cursor and Drawing then
                 library.cursor1.PointC = Pos + Vector2.new(5, 14)
             end
         end)
-        runservice.Heartbeat:Connect(function()
-            local gui = coregui:WaitForChild("millionware.vip v500")
-            local main = gui and gui:WaitForChild("main")
-            local isVisible = main and main.Visible or false
-            library.cursor.Visible = isVisible
-            library.cursor1.Visible = isVisible
-            if isVisible then
-                uis.MouseBehavior = Enum.MouseBehavior.Default
-                uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
-                game:GetService("GuiService").SelectedObject = nil
-            else
-                if uis.OverrideMouseIconBehavior == Enum.OverrideMouseIconBehavior.ForceHide then
-                    uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None
-                end
-            end
-        end)
     end
 end
 
@@ -370,6 +354,22 @@ function library:CreateWindow(name, size, hidebutton)
 				window.Frame.Visible = not window.Frame.Visible
 			end
 		end)
+		runservice.Heartbeat:Connect(function()
+            local gui = coregui:WaitForChild(window.name)
+            local main = gui and gui:WaitForChild("main")
+            local isVisible = main and main.Visible or false
+            library.cursor.Visible = isVisible
+            library.cursor1.Visible = isVisible
+            if isVisible then
+                uis.MouseBehavior = Enum.MouseBehavior.Default
+                uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.ForceHide
+                game:GetService("GuiService").SelectedObject = nil
+            else
+                if uis.OverrideMouseIconBehavior == Enum.OverrideMouseIconBehavior.ForceHide then
+                    uis.OverrideMouseIconBehavior = Enum.OverrideMouseIconBehavior.None
+                end
+            end
+        end)
 
 	local function checkIfGuiInFront(Pos)
 		local objects = coregui:GetGuiObjectsAtPosition(Pos.X, Pos.Y)
