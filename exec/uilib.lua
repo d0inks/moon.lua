@@ -3974,27 +3974,23 @@ function library:CreateWindow(name, size, hidebutton)
 		function tab:CreateConfigSystem(side)
 			local configSystem = {}
 
-			configSystem.configFolder = window.name .. "/" .. tostring(game.PlaceId)
+			configSystem.configFolder = "moon" .. "/" .. tostring(game.PlaceId)
 			if not isfolder(configSystem.configFolder) then
 				makefolder(configSystem.configFolder)
 			end
-
 			configSystem.sector = tab:CreateSector("Configs", side or "left")
-
 			local ConfigName = configSystem.sector:AddTextbox("Config Name", "", ConfigName, function() end, "")
-			local default = tostring(listfiles(configSystem.configFolder)[1] or "")
-				:gsub(configSystem.configFolder .. "\\", "")
-				:gsub(".txt", "")
+			local default = tostring(listfiles(configSystem.configFolder)[1] or ""):gsub(configSystem.configFolder .. "\\", ""):gsub(".moon", "")
 			local Config = configSystem.sector:AddDropdown("Configs", {}, default, false, function() end, "")
 			for i, v in pairs(listfiles(configSystem.configFolder)) do
-				if v:find(".txt") then
-					Config:Add(tostring(v):gsub(configSystem.configFolder .. "\\", ""):gsub(".txt", ""))
+				if v:find(".moon") then
+					Config:Add(tostring(v):gsub(configSystem.configFolder .. "\\", ""):gsub(".moon", ""))
 				end
 			end
 
 			configSystem.Create = configSystem.sector:AddButton("Create", function()
 				for i, v in pairs(listfiles(configSystem.configFolder)) do
-					Config:Remove(tostring(v):gsub(configSystem.configFolder .. "\\", ""):gsub(".txt", ""))
+					Config:Remove(tostring(v):gsub(configSystem.configFolder .. "\\", ""):gsub(".moon", ""))
 				end
 
 				if ConfigName:Get() and ConfigName:Get() ~= "" then
@@ -4015,13 +4011,13 @@ function library:CreateWindow(name, size, hidebutton)
 					end
 
 					writefile(
-						configSystem.configFolder .. "/" .. ConfigName:Get() .. ".txt",
+						configSystem.configFolder .. "/" .. ConfigName:Get() .. ".moon",
 						httpservice:JSONEncode(config)
 					)
 
 					for i, v in pairs(listfiles(configSystem.configFolder)) do
-						if v:find(".txt") then
-							Config:Add(tostring(v):gsub(configSystem.configFolder .. "\\", ""):gsub(".txt", ""))
+						if v:find(".moon") then
+							Config:Add(tostring(v):gsub(configSystem.configFolder .. "\\", ""):gsub(".moon", ""))
 						end
 					end
 				end
@@ -4045,18 +4041,18 @@ function library:CreateWindow(name, size, hidebutton)
 					end
 
 					writefile(
-						configSystem.configFolder .. "/" .. Config:Get() .. ".txt",
+						configSystem.configFolder .. "/" .. Config:Get() .. ".moon",
 						httpservice:JSONEncode(config)
 					)
 				end
 			end)
 
 			configSystem.Load = configSystem.sector:AddButton("Load", function()
-				local Success = pcall(readfile, configSystem.configFolder .. "/" .. Config:Get() .. ".txt")
+				local Success = pcall(readfile, configSystem.configFolder .. "/" .. Config:Get() .. ".moon")
 				if Success then
 					pcall(function()
 						local ReadConfig =
-							httpservice:JSONDecode(readfile(configSystem.configFolder .. "/" .. Config:Get() .. ".txt"))
+							httpservice:JSONDecode(readfile(configSystem.configFolder .. "/" .. Config:Get() .. ".moon"))
 						local NewConfig = {}
 
 						for i, v in pairs(ReadConfig) do
@@ -4098,20 +4094,20 @@ function library:CreateWindow(name, size, hidebutton)
 
 			configSystem.Delete = configSystem.sector:AddButton("Delete", function()
 				for i, v in pairs(listfiles(configSystem.configFolder)) do
-					Config:Remove(tostring(v):gsub(configSystem.configFolder .. "\\", ""):gsub(".txt", ""))
+					Config:Remove(tostring(v):gsub(configSystem.configFolder .. "\\", ""):gsub(".moon", ""))
 				end
 
 				if not Config:Get() or Config:Get() == "" then
 					return
 				end
-				if not isfile(configSystem.configFolder .. "/" .. Config:Get() .. ".txt") then
+				if not isfile(configSystem.configFolder .. "/" .. Config:Get() .. ".moon") then
 					return
 				end
-				delfile(configSystem.configFolder .. "/" .. Config:Get() .. ".txt")
+				delfile(configSystem.configFolder .. "/" .. Config:Get() .. ".moon")
 
 				for i, v in pairs(listfiles(configSystem.configFolder)) do
-					if v:find(".txt") then
-						Config:Add(tostring(v):gsub(configSystem.configFolder .. "\\", ""):gsub(".txt", ""))
+					if v:find(".moon") then
+						Config:Add(tostring(v):gsub(configSystem.configFolder .. "\\", ""):gsub(".moon", ""))
 					end
 				end
 			end)
