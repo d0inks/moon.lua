@@ -1290,9 +1290,10 @@ do
                 if KeyPicker.Mode == 'Toggle' then
                     local Key = KeyPicker.Value;
 
-                    if Key == 'MB1' or Key == 'MB2' then
+                    if Key == 'MB1' or Key == 'MB2' or Key == 'MB3' then
                         if Key == 'MB1' and Input.UserInputType == Enum.UserInputType.MouseButton1
-                        or Key == 'MB2' and Input.UserInputType == Enum.UserInputType.MouseButton2 then
+                        or Key == 'MB2' and Input.UserInputType == Enum.UserInputType.MouseButton2
+                        or Key == 'MB3' and Input.UserInputType == Enum.UserInputType.MouseButton3 then
                             KeyPicker.Toggled = not KeyPicker.Toggled
                             KeyPicker:DoClick()
                         end;
