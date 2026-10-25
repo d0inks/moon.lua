@@ -1757,26 +1757,46 @@ do --// UI Source
 
                 Items["KeyButton"]:Connect("MouseButton1Click", function()
                     if PickConnection then
-                        return
+                        PickConnection:Disconnect()
+                        PickConnection = nil
                     end
 
+                    local PreviousText = Keybind.Value ~= "" and Keybind.Value or "None"
+                    local StartedAt = os.clock()
                     Keybind.Picking = true
 
                     Items["KeyButton"].Instance.Text = ". . ."
                     Items["KeyButton"]:Tween({TextColor3 = Library.Theme.Text})
 
                     PickConnection = UserInputService.InputBegan:Connect(function(Input)
-                        if Input.UserInputType ~= Enum.UserInputType.Keyboard and not string.find(Input.UserInputType.Name, "MouseButton") then
+                        local Kind = Input.UserInputType
+                        local Bindable = Kind == Enum.UserInputType.Keyboard
+                            or Kind == Enum.UserInputType.MouseButton1
+                            or Kind == Enum.UserInputType.MouseButton2
+                            or Kind == Enum.UserInputType.MouseButton3
+
+                        if not Bindable then
+                            return
+                        end
+
+                        if Kind == Enum.UserInputType.MouseButton1 and os.clock() - StartedAt < 0.2 then
+                            return
+                        end
+
+                        if Kind == Enum.UserInputType.Keyboard and Input.KeyCode == Enum.KeyCode.Unknown then
                             return
                         end
 
                         PickConnection:Disconnect()
                         PickConnection = nil
 
-                        if Input.UserInputType == Enum.UserInputType.Keyboard then
+                        if Kind == Enum.UserInputType.Keyboard and Input.KeyCode == Enum.KeyCode.Escape then
+                            Keybind.Picking = false
+                            Items["KeyButton"].Instance.Text = PreviousText
+                        elseif Kind == Enum.UserInputType.Keyboard then
                             Keybind:Set(Input.KeyCode)
                         else
-                            Keybind:Set(Input.UserInputType)
+                            Keybind:Set(Kind)
                         end
 
                         Items["KeyButton"]:Tween({TextColor3 = Library.Theme["Inactive Text"]})
@@ -2073,6 +2093,19 @@ do --// UI Source
                     local Widget = { Name = Name, Callback = Callback }
                     table.insert(Watermark.Widgets, Widget)
                     Watermark.Enabled[Name] = Default ~= false
+
+                    local Dropdown = Library.WatermarkDropdown
+                    if Dropdown then
+                        Dropdown:Add(Name)
+
+                        local Current = table.clone(type(Dropdown.Value) == "table" and Dropdown.Value or { })
+                        if Watermark.Enabled[Name] and not table.find(Current, Name) then
+                            table.insert(Current, Name)
+                        end
+
+                        Dropdown:Set(Current)
+                    end
+
                     return Widget
                 end
 
@@ -5659,7 +5692,7 @@ do --// UI Source
                                 end
                             end
 
-                            OtherSection:Dropdown({
+                            Library.WatermarkDropdown = OtherSection:Dropdown({
                                 Name = "watermark widgets",
                                 Flag = "library_watermarkwidgets",
                                 Items = WidgetNames,
