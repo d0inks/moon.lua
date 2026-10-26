@@ -2426,8 +2426,6 @@ do --// UI Source
                         })
                     end
 
-                    task.wait()
-
                     local CanBeVisible = true
 
                     function NewItems:SetVis(Bool)
