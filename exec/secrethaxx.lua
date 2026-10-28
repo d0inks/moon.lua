@@ -1625,6 +1625,10 @@ do --// UI Source
                         Toggled = Keybind.Toggled
                     }
 
+                    if Keybind.ModeDropdown and Keybind.ModeDropdown.Value ~= Keybind.Mode then
+                        Keybind.ModeDropdown:Set(Keybind.Mode)
+                    end
+
                     if Data.Callback then
                         Library:SafeCall(Data.Callback, Keybind.Toggled)
                     end
@@ -1637,7 +1641,7 @@ do --// UI Source
                     Flag = Keybind.Flag .. "ModeDropdown",
                     Parent = Items["KeybindWindow"],
                     Items = { "Toggle", "Hold", "Always" },
-                    Default = "Toggle",
+                    Default = Data.Mode or "Toggle",
                     Callback = function(Value)
                         Keybind.Mode = Value
 
@@ -1648,6 +1652,7 @@ do --// UI Source
                         end
                     end
                 })
+                Keybind.ModeDropdown = ModeDropdown
 
                 local ShowInKeybindsList = Library:Toggle({
                     Name = "show in keybinds list",
@@ -5671,7 +5676,7 @@ do --// UI Source
                         local WatermarkObject = Library.WatermarkObject
 
                         if WatermarkObject then
-                            OtherSection:Toggle({
+                            local WatermarkToggle = OtherSection:Toggle({
                                 Name = "watermark",
                                 Flag = "library_watermark",
                                 Default = true,
@@ -5679,6 +5684,10 @@ do --// UI Source
                                     WatermarkObject:SetVisibility(Value)
                                 end
                             })
+
+                            if Library.OnWatermarkSettings then
+                                Library.OnWatermarkSettings(WatermarkToggle:Settings())
+                            end
 
                             local WidgetNames, EnabledWidgets = { }, { }
 
