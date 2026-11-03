@@ -204,13 +204,30 @@ do --// UI Source
                 local Folder = Library.Directory .. Library.Folders.Assets .. "/"
                 local FontFile = Folder .. Data.Id .. ".ttf"
 
-                if not isfile(FontFile) then
+                if not isfile(FontFile) or #readfile(FontFile) < 1024 then
                     if isfile(Data.Id) then
                         writefile(FontFile, readfile(Data.Id))
                     else
-                        local Success, Body = pcall(game.HttpGet, game, Data.Url)
+                        local Body
 
-                        if not Success or type(Body) ~= "string" or #Body < 1024 then
+                        local Success, Result = pcall(game.HttpGet, game, Data.Url)
+                        if Success and type(Result) == "string" and #Result >= 1024 then
+                            Body = Result
+                        end
+
+                        if not Body then
+                            local Request = request or http_request or (syn and syn.request) or (http and http.request)
+
+                            if Request then
+                                local Ok, Response = pcall(Request, { Url = Data.Url, Method = "GET" })
+
+                                if Ok and type(Response) == "table" and type(Response.Body) == "string" and #Response.Body >= 1024 then
+                                    Body = Response.Body
+                                end
+                            end
+                        end
+
+                        if not Body then
                             warn("could not get font " .. Name .. ", using Code instead")
                             return Font.fromEnum(Enum.Font.Code)
                         end
