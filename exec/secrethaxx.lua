@@ -1664,7 +1664,7 @@ do --// UI Source
 
                         Keybind:SetMode()
 
-                        if Value == "Always" then
+                        if Value == "Always" and Keybind.Press then
                             Keybind:Press(true)
                         end
                     end
@@ -1713,6 +1713,10 @@ do --// UI Source
                     end
 
                     Update()
+                end
+
+                if Keybind.Mode == "Always" then
+                    Keybind:Press(true)
                 end
 
                 function Keybind:Set(Key)
@@ -5106,30 +5110,20 @@ do --// UI Source
                             local TextFormat = #Dropdown.Value > 0 and table.concat(Dropdown.Value, ", ") or "..."
                             Items["Value"].Instance.Text = TextFormat
                         else
-                            if OptionData.IsSelected then
-                                Dropdown.Value = OptionData.Name
-                                Flags[Dropdown.Flag] = OptionData.Name
+                            Dropdown.Value = OptionData.Name
+                            Flags[Dropdown.Flag] = OptionData.Name
 
-                                OptionData.IsSelected = true
-                                OptionData:ToggleState("Active")
+                            OptionData.IsSelected = true
+                            OptionData:ToggleState("Active")
 
-                                for Index, Value in Dropdown.Options do
-                                    if Value ~= OptionData then
-                                        Value.IsSelected = false
-                                        Value:ToggleState("Inactive")
-                                    end
+                            for Index, Value in Dropdown.Options do
+                                if Value ~= OptionData then
+                                    Value.IsSelected = false
+                                    Value:ToggleState("Inactive")
                                 end
-
-                                Items["Value"].Instance.Text = OptionData.Name
-                            else
-                                Dropdown.Value = nil
-                                Flags[Dropdown.Flag] = nil
-
-                                OptionData.IsSelected = false
-                                OptionData:ToggleState("Inactive")
-
-                                Items["Value"].Instance.Text = "..."
                             end
+
+                            Items["Value"].Instance.Text = OptionData.Name
                         end
 
                         Library:SafeCall(Dropdown.Callback, Dropdown.Value)
