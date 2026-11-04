@@ -4844,6 +4844,7 @@ do --// UI Source
                     Default = Params.Default or Params.default or "",
                     Callback = Params.Callback or Params.callback or function() end,
                     Multi = Params.Multi or Params.multi or false,
+                    MaxHeight = Params.MaxHeight or Params.maxheight or 180,
 
                     Window = Self.Window,
                     Page = Self.Page,
@@ -4943,21 +4944,21 @@ do --// UI Source
                         Parent = Items["Value"].Instance
                     })
 
-                    Items["OptionHolder"] = Library:Create("TextButton", {
+                    Items["OptionHolder"] = Library:Create("ScrollingFrame", {
                         Name = "\0",
-                        FontFace = Library.Font,
-                        TextSize = Library.FontSize,
                         Parent = Library.UnusedHolder.Instance,
                         Visible = false,
-                        TextColor3 = Color3.fromRGB(0, 0, 0),
-                        Text = "",
-                        AutoButtonColor = false,
+                        Active = true,
                         Size = UDim2.new(0, 246, 0, 0),
                         Position = UDim2.new(0, 979, 0, 167),
                         BorderSizePixel = 0,
-                        AutomaticSize = Enum.AutomaticSize.Y,
+                        CanvasSize = UDim2.new(0, 0, 0, 0),
+                        AutomaticCanvasSize = Enum.AutomaticSize.Y,
+                        ScrollingDirection = Enum.ScrollingDirection.Y,
+                        ScrollBarThickness = 3,
+                        ScrollBarImageColor3 = Library.Theme["Accent"],
                         BackgroundColor3 = Library.Theme["Background"]
-                    }):AddToTheme({BackgroundColor3 = 'Background'})
+                    }):AddToTheme({BackgroundColor3 = 'Background', ScrollBarImageColor3 = 'Accent'})
 
                     Library:Create("UIStroke", {
                         Name = "\0",
@@ -5179,7 +5180,14 @@ do --// UI Source
 
                     if Dropdown.IsOpen then
                         OptionHolder.Position = UDim2.new(0, RealDropdown.AbsolutePosition.X, 0, RealDropdown.AbsolutePosition.Y + RealDropdown.AbsoluteSize.Y + GuiInset)
-                        OptionHolder.Size = UDim2.new(0, RealDropdown.AbsoluteSize.X, 0, Dropdown.MaxSize)
+                        local OptionCount = 0
+
+                        for Index, Value in Dropdown.Options do
+                            OptionCount += 1
+                        end
+
+                        OptionHolder.Size = UDim2.new(0, RealDropdown.AbsoluteSize.X, 0, math.min(OptionCount * 17 + 7, Dropdown.MaxHeight))
+                        OptionHolder.CanvasPosition = Vector2.zero
 
                         OptionHolder.Parent = Library.Holder.Instance
                         Items["OptionHolder"]:Tween({Position = UDim2.new(0, RealDropdown.AbsolutePosition.X, 0, RealDropdown.AbsolutePosition.Y + RealDropdown.AbsoluteSize.Y + 10 + GuiInset)})
