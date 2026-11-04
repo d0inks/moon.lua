@@ -4959,10 +4959,9 @@ do --// UI Source
                         CanvasSize = UDim2.new(0, 0, 0, 0),
                         AutomaticCanvasSize = Enum.AutomaticSize.Y,
                         ScrollingDirection = Enum.ScrollingDirection.Y,
-                        ScrollBarThickness = 3,
-                        ScrollBarImageColor3 = Library.Theme["Accent"],
+                        ScrollBarThickness = 0,
                         BackgroundColor3 = Library.Theme["Background"]
-                    }):AddToTheme({BackgroundColor3 = 'Background', ScrollBarImageColor3 = 'Accent'})
+                    }):AddToTheme({BackgroundColor3 = 'Background'})
 
                     Library:Create("UIStroke", {
                         Name = "\0",
