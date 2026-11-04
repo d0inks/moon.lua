@@ -304,6 +304,56 @@ do --// UI Source
             getgenv().Library = nil
         end
 
+        local ResolveKeybindKey = function(Key)
+            if type(Key) ~= "string" then
+                return Key
+            end
+
+            local Kind, Name = Key:match("^Enum%.(%a+)%.(%w+)$")
+
+            if Kind == "KeyCode" or Kind == "UserInputType" then
+                return Enum[Kind][Name]
+            end
+
+            return nil
+        end
+
+        local KeyFlagMeta = {
+            __index = function(State, Name)
+                if Name ~= "Value" then
+                    return nil
+                end
+
+                if State.Mode == "Always" then
+                    return true
+                end
+
+                if State.Mode == "Hold" then
+                    local Key = ResolveKeybindKey(State.Key)
+
+                    if not Key or Key == Enum.KeyCode.None or Key == Enum.KeyCode.Unknown then
+                        return false
+                    end
+
+                    if Key.EnumType == Enum.KeyCode then
+                        return UserInputService:IsKeyDown(Key)
+                    end
+
+                    if Key == Enum.UserInputType.MouseButton1 or Key == Enum.UserInputType.MouseButton2 or Key == Enum.UserInputType.MouseButton3 then
+                        return UserInputService:IsMouseButtonPressed(Key)
+                    end
+
+                    return false
+                end
+
+                return State.Toggled == true
+            end
+        }
+
+        Library.KeyFlag = function(Self, State)
+            return setmetatable(State, KeyFlagMeta)
+        end
+
         Library.Create = function(Self, Class, Properties)
             local Data = {
                 Class = Class,
@@ -899,7 +949,7 @@ do --// UI Source
             AutomaticSize = Enum.AutomaticSize.X
         })
 
-        Library:Create("UIListLayout", {
+        Library.NotifLayout = Library:Create("UIListLayout", {
             Name = "\0",
             Parent = Library.NotifHolder.Instance,
             VerticalAlignment = Enum.VerticalAlignment.Bottom,
@@ -915,6 +965,30 @@ do --// UI Source
             PaddingRight = UDim.new(0, 8),
             PaddingLeft = UDim.new(0, 8)
         })
+
+        Library.NotifPositions = {"Top Left", "Top Center", "Top Right", "Center Left", "Center", "Center Right", "Bottom Left", "Bottom Center", "Bottom Right"}
+
+        Library.SetNotifPosition = function(Self, Position)
+            local Vertical, Horizontal = "Bottom", "Left"
+
+            if Position == "Center" then
+                Vertical, Horizontal = "Center", "Center"
+            elseif type(Position) == "string" then
+                local First, Second = Position:match("^(%a+) (%a+)$")
+
+                if First and Second then
+                    Vertical, Horizontal = First, Second
+                end
+            end
+
+            local Holder = Library.NotifHolder.Instance
+            local AnchorX = Horizontal == "Left" and 0 or Horizontal == "Center" and 0.5 or 1
+
+            Holder.AnchorPoint = Vector2.new(AnchorX, 0)
+            Holder.Position = UDim2.new(AnchorX, 0, 0, 0)
+            Library.NotifLayout.Instance.HorizontalAlignment = Enum.HorizontalAlignment[Horizontal]
+            Library.NotifLayout.Instance.VerticalAlignment = Enum.VerticalAlignment[Vertical]
+        end
 
         do
             Library.CreateColorpicker = function(Self, Data)
@@ -1640,11 +1714,11 @@ do --// UI Source
                 end
 
                 function Keybind:SetMode()
-                    Flags[Keybind.Flag] = {
+                    Flags[Keybind.Flag] = Library:KeyFlag({
                         Mode = Keybind.Mode,
                         Key = Keybind.Key,
                         Toggled = Keybind.Toggled
-                    }
+                    })
 
                     if Keybind.ModeDropdown and Keybind.ModeDropdown.Value ~= Keybind.Mode then
                         Keybind.ModeDropdown:Set(Keybind.Mode)
@@ -1706,11 +1780,11 @@ do --// UI Source
                         Keybind.Toggled = true
                     end
 
-                    Flags[Keybind.Flag] = {
+                    Flags[Keybind.Flag] = Library:KeyFlag({
                         Mode = Keybind.Mode,
                         Key = Keybind.Key,
                         Toggled = Keybind.Toggled
-                    }
+                    })
 
                     if Data.Callback then
                         Library:SafeCall(Data.Callback, Keybind.Toggled)
@@ -1735,11 +1809,11 @@ do --// UI Source
                         Keybind.Value = TextToDisplay
                         Items["KeyButton"].Instance.Text = TextToDisplay
 
-                        Flags[Keybind.Flag] = {
+                        Flags[Keybind.Flag] = Library:KeyFlag({
                             Mode = Keybind.Mode,
                             Key = Keybind.Key,
                             Toggled = Keybind.Toggled
-                        }
+                        })
 
                         if Data.Callback then
                             Library:SafeCall(Data.Callback, Keybind.Toggled)
@@ -5750,6 +5824,16 @@ do --// UI Source
                             Default = true,
                             Callback = function(Value)
                                 Library.CursorEnabled = Value
+                            end
+                        })
+
+                        OtherSection:Dropdown({
+                            Name = "notification position",
+                            Flag = "library_notifposition",
+                            Items = Library.NotifPositions,
+                            Default = "Bottom Left",
+                            Callback = function(Value)
+                                Library:SetNotifPosition(Value)
                             end
                         })
 
