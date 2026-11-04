@@ -369,6 +369,10 @@ do --// UI Source
         end
 
         Library.Tween = function(Self, Properties, Info, IsRawItem)
+            if not Library then
+                return
+            end
+
             local Object = Self.Instance or IsRawItem
             Info = Info or TweenInfo.new(Library.Animation.Time, Enum.EasingStyle[Library.Animation.Style], Enum.EasingDirection[Library.Animation.Direction])
 
