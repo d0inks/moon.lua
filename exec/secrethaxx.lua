@@ -320,8 +320,22 @@ do --// UI Source
 
         local KeyFlagMeta = {
             __index = function(State, Name)
-                if Name ~= "Value" then
+                if Name ~= "Value" and Name ~= "Bound" and Name ~= "KeyCode" then
                     return nil
+                end
+
+                local Key = ResolveKeybindKey(State.Key)
+
+                if Key == Enum.KeyCode.None or Key == Enum.KeyCode.Unknown then
+                    Key = nil
+                end
+
+                if Name == "Bound" then
+                    return Key ~= nil
+                end
+
+                if Name == "KeyCode" then
+                    return Key
                 end
 
                 if State.Mode == "Always" then
@@ -329,9 +343,7 @@ do --// UI Source
                 end
 
                 if State.Mode == "Hold" then
-                    local Key = ResolveKeybindKey(State.Key)
-
-                    if not Key or Key == Enum.KeyCode.None or Key == Enum.KeyCode.Unknown then
+                    if not Key then
                         return false
                     end
 
