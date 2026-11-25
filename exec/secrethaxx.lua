@@ -994,26 +994,36 @@ do --// UI Source
         Library.Dependencies = { }
 
         Library.UpdateDependencies = function(Self)
-            for _, Dependency in Library.Dependencies do
-                local Value = Flags[Dependency.Flag]
-                local Show = false
+            for Element, Conditions in Library.Dependencies do
+                local Show = true
 
-                for _, Wanted in Dependency.Values do
-                    if Value == Wanted or (type(Value) == "table" and table.find(Value, Wanted)) then
-                        Show = true
+                for _, Condition in Conditions do
+                    local Value = Flags[Condition.Flag]
+                    local Match = false
+
+                    for _, Wanted in Condition.Values do
+                        if Value == Wanted or (type(Value) == "table" and table.find(Value, Wanted)) then
+                            Match = true
+                            break
+                        end
+                    end
+
+                    if not Match then
+                        Show = false
                         break
                     end
                 end
 
-                if Dependency.Element.SetVisibility then
-                    Dependency.Element:SetVisibility(Show)
+                if Element.SetVisibility then
+                    Element:SetVisibility(Show)
                 end
             end
         end
 
         Library.DependsOn = function(Self, Flag, Values)
-            table.insert(Library.Dependencies, {
-                Element = Self,
+            Library.Dependencies[Self] = Library.Dependencies[Self] or { }
+
+            table.insert(Library.Dependencies[Self], {
                 Flag = Flag,
                 Values = type(Values) == "table" and Values or { Values }
             })
@@ -5975,7 +5985,8 @@ Toggle settings panel
 Dependencies
     Element:DependsOn(flag, value or { values })
     Shows the element only while Flags[flag] matches one of the values (multi dropdowns match if any
-    selected item matches; works with toggles too: DependsOn("esp", true)).
+    selected item matches; works with toggles too: DependsOn("esp", true)). Chain it for several
+    conditions; all of them must match: Slider:DependsOn("mode", "A"):DependsOn("esp", true)
 
 Other
     Library:Notification({ Name = "text", Time = 3 })      -- Time is required
