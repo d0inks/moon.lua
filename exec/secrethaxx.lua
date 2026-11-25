@@ -374,19 +374,7 @@ do --// UI Source
             }
 
             for Index, Property in Properties do
-                if Property == "FontFace" then
-                    Data.Instance[Property] = Library.Font
-                elseif Property == "TextSize" then
-                    Data.Instance[Property] = Library.FontSize
-                elseif Property == "Name" then
-                    Data.Instance[Property] = "\0"
-                elseif Class == "TextButton" and Property == "AutoButtonColor" then
-                    Data.Instance[Property] = false
-                elseif Class == "TextButton" and Property == "Text" then
-                    Data.Instance[Property] = ""
-                else
-                    Data.Instance[Index] = Property
-                end
+                Data.Instance[Index] = Property
             end
 
             return setmetatable(Data, Library)
@@ -956,6 +944,7 @@ do --// UI Source
             Name = "\0",
             Parent = Library.Holder.Instance,
             BackgroundTransparency = 1,
+            Position = UDim2.new(0, 0, 0, 60),
             Size = UDim2.new(0, 0, 1, 0),
             BorderSizePixel = 0,
             AutomaticSize = Enum.AutomaticSize.X
@@ -964,7 +953,7 @@ do --// UI Source
         Library.NotifLayout = Library:Create("UIListLayout", {
             Name = "\0",
             Parent = Library.NotifHolder.Instance,
-            VerticalAlignment = Enum.VerticalAlignment.Bottom,
+            VerticalAlignment = Enum.VerticalAlignment.Top,
             SortOrder = Enum.SortOrder.LayoutOrder,
             Padding = UDim.new(0, 6)
         })
@@ -997,9 +986,41 @@ do --// UI Source
             local AnchorX = Horizontal == "Left" and 0 or Horizontal == "Center" and 0.5 or 1
 
             Holder.AnchorPoint = Vector2.new(AnchorX, 0)
-            Holder.Position = UDim2.new(AnchorX, 0, 0, 0)
+            Holder.Position = UDim2.new(AnchorX, 0, 0, Vertical == "Top" and 60 or 0)
             Library.NotifLayout.Instance.HorizontalAlignment = Enum.HorizontalAlignment[Horizontal]
             Library.NotifLayout.Instance.VerticalAlignment = Enum.VerticalAlignment[Vertical]
+        end
+
+        Library.Dependencies = { }
+
+        Library.UpdateDependencies = function(Self)
+            for _, Dependency in Library.Dependencies do
+                local Value = Flags[Dependency.Flag]
+                local Show = false
+
+                for _, Wanted in Dependency.Values do
+                    if Value == Wanted or (type(Value) == "table" and table.find(Value, Wanted)) then
+                        Show = true
+                        break
+                    end
+                end
+
+                if Dependency.Element.SetVisibility then
+                    Dependency.Element:SetVisibility(Show)
+                end
+            end
+        end
+
+        Library.DependsOn = function(Self, Flag, Values)
+            table.insert(Library.Dependencies, {
+                Element = Self,
+                Flag = Flag,
+                Values = type(Values) == "table" and Values or { Values }
+            })
+
+            Library:UpdateDependencies()
+
+            return Self
         end
 
         do
@@ -4430,7 +4451,7 @@ do --// UI Source
                         AnchorPoint = Vector2.new(1, 0),
                         BackgroundTransparency = 1,
                         Position = UDim2.new(1, -1, 0, 0),
-                        Size = UDim2.new(0, 0, 1, 0),
+                        Size = UDim2.new(0, 0, 0, 12),
                         BorderSizePixel = 0
                     })
 
@@ -4472,6 +4493,7 @@ do --// UI Source
 
                     Flags[Toggle.Flag] = Bool
                     Library:SafeCall(Toggle.Callback, Bool)
+                    Library:UpdateDependencies()
                 end
 
                 function Toggle:SetVisibility(Bool)
@@ -4595,6 +4617,9 @@ do --// UI Source
                     end
 
                     Toggle.SettingsItem = Settings
+                    if Toggle.Value then
+                        Settings:SetOpen(true)
+                    end
                     return setmetatable(Settings, Library)
                 end
 
@@ -5133,6 +5158,7 @@ do --// UI Source
                     end
 
                     Library:SafeCall(Dropdown.Callback, Dropdown.Value)
+                    Library:UpdateDependencies()
                 end
 
                 function Dropdown:Add(Value)
@@ -5794,7 +5820,11 @@ do --// UI Source
                             })
 
                             if Library.OnWatermarkSettings then
-                                Library.OnWatermarkSettings(WatermarkToggle:Settings())
+                                local WatermarkSettings = WatermarkToggle:Settings()
+                                Library.OnWatermarkSettings(WatermarkSettings)
+                                task.defer(function()
+                                    WatermarkSettings:SetOpen(WatermarkToggle.Value)
+                                end)
                             end
 
                             local WidgetNames, EnabledWidgets = { }, { }
@@ -5843,7 +5873,7 @@ do --// UI Source
                             Name = "notification position",
                             Flag = "library_notifposition",
                             Items = Library.NotifPositions,
-                            Default = "Bottom Left",
+                            Default = "Top Left",
                             Callback = function(Value)
                                 Library:SetNotifPosition(Value)
                             end
@@ -5901,3 +5931,59 @@ end
 
 getgenv().Library = Library
 return Library
+
+--[==[
+secrethaxx UI library - quick reference
+
+Loading
+    local Library = loadstring(game:HttpGet("<url to this file>"))()
+    Library:SetFolder("myscript")          -- configs go in myscript/configs, autoload in myscript/autoload.txt
+    local Flags = Library.Flags            -- every element writes its value here under its Flag
+
+Window and layout
+    local Window = Library:Window({ Name = "name", Size = UDim2.fromOffset(485, 417) })
+    local Page = Window:Page({ Name = "combat" })
+    local Section = Page:Section({ Name = "aimbot", Side = 1 })      -- Side 1 = left column, 2 = right
+    local Multi = Page:MultiSection({ Side = 2 })
+    local Tab = Multi:Add("tab name")                                -- tabs inside one box
+    Window:InitWindow()                                              -- call LAST: builds the settings page and runs autoload
+
+Elements (on a Section, a MultiSection tab or a Toggle:Settings() panel)
+    Section:Toggle({ Name, Flag, Default = false, Callback })
+    Section:Slider({ Name, Flag, Min = 0, Max = 100, Default = 0, Decimals = 1, Suffix = "", Callback })
+    Section:Dropdown({ Name, Flag, Items = {}, Default = "", Multi = false, Callback })
+    Section:Textbox({ Name, Flag, Default = "", Placeholder = "", Numeric = false, Finished = false, Callback })
+    Section:Button({ Name, Callback })
+    Section:Label({ Name })
+    Always pass a unique Flag. Callbacks also fire once at creation with the default value.
+
+    Every element returns an object with :Set(value), :SetVisibility(bool), :SetText(text).
+    Dropdowns also have :Refresh(list), :Add(item), :Remove(item).
+
+Attachments (on a Toggle or a Label)
+    :Colorpicker({ Flag, Default = Color3, Alpha = 1 })   -> Flags[flag] = { Color, Alpha, Transparency }
+    :Keybind({ Name, Flag, Default = Enum.KeyCode.E, Mode = "Toggle" | "Hold" | "Always" })
+        -> Flags[flag].Value   true while held / toggled on / Always
+           Flags[flag].Bound   false when no key is set
+           Flags[flag].KeyCode the Enum.KeyCode or Enum.UserInputType
+    Right click a keybind to change its mode or show it in the keybind list.
+
+Toggle settings panel
+    local Settings = Section:Toggle({ Name = "esp", Flag = "esp" }):Settings()
+    Settings:Slider({ ... })                               -- only shown while the toggle is on
+
+Dependencies
+    Element:DependsOn(flag, value or { values })
+    Shows the element only while Flags[flag] matches one of the values (multi dropdowns match if any
+    selected item matches; works with toggles too: DependsOn("esp", true)).
+
+Other
+    Library:Notification({ Name = "text", Time = 3 })      -- Time is required
+    Library:Connect(signal, fn)                            -- disconnected automatically on unload
+    Window:Watermark({ Name, SubName }):AddWidget(name, function() return text end, defaultOn)
+    Window:KeybindList({ Name })
+    Library.OnWatermarkSettings = function(settings) ... end  -- add your own options under the watermark toggle
+    Library.Unloaded                                       -- true after Library:Exit() (the unload button)
+    Library:LoadConfig(json) / config buttons on the settings page
+    Library.Theme                                          -- colors (Accent, Background, Text, Outline 1-4, ...)
+]==]
