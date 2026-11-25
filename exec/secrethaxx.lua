@@ -1014,11 +1014,23 @@ do --// UI Source
                     end
                 end
 
-                if Element.SetVisibility then
+                if Element.SetVisibility and Element.DependencyShown ~= Show then
+                    Element.DependencyShown = Show
                     Element:SetVisibility(Show)
                 end
             end
         end
+
+        local DependencyClock = 0
+
+        Library:Connect(RunService.Heartbeat, function(DeltaTime)
+            DependencyClock += DeltaTime
+
+            if DependencyClock >= 0.2 and next(Library.Dependencies) then
+                DependencyClock = 0
+                Library:UpdateDependencies()
+            end
+        end)
 
         Library.DependsOn = function(Self, Flag, Values)
             Library.Dependencies[Self] = Library.Dependencies[Self] or { }
@@ -5253,6 +5265,7 @@ do --// UI Source
                         end
 
                         Library:SafeCall(Dropdown.Callback, Dropdown.Value)
+                        Library:UpdateDependencies()
                     end
 
                     OptionData.Button:Connect("MouseButton1Down", function()
