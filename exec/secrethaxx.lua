@@ -1694,6 +1694,23 @@ do --// UI Source
                 local KeyButton = Items["KeyButton"].Instance
 
                 local IsSettings = Data.Section and Data.Section.IsSettings
+                local FollowConnection
+
+                local function KeyButtonShown()
+                    local Shown = KeyButton.Visible
+                    local Parent = KeyButton.Parent
+
+                    while Shown and Parent and Parent:IsA("GuiObject") do
+                        Shown = Parent.Visible
+                        Parent = Parent.Parent
+                    end
+
+                    if Shown and Parent and Parent:IsA("LayerCollector") then
+                        Shown = Parent.Enabled
+                    end
+
+                    return Shown and Parent ~= nil
+                end
 
                 function Keybind:SetOpen(Bool)
                     if Debounce then
@@ -1704,7 +1721,20 @@ do --// UI Source
 
                     Debounce = true
 
+                    if FollowConnection then
+                        FollowConnection:Disconnect()
+                        FollowConnection = nil
+                    end
+
                     if Keybind.IsOpen then
+                        FollowConnection = RunService.RenderStepped:Connect(function()
+                            if not KeyButtonShown() then
+                                Keybind:SetOpen(false)
+                            elseif not Debounce then
+                                KeybindWindow.Position = UDim2.new(0, KeyButton.AbsolutePosition.X, 0, KeyButton.AbsolutePosition.Y + KeyButton.AbsoluteSize.Y + 10 + GuiInset)
+                            end
+                        end)
+
                         KeybindWindow.Position = UDim2.new(0, KeyButton.AbsolutePosition.X, 0, KeyButton.AbsolutePosition.Y + KeyButton.AbsoluteSize.Y + GuiInset)
 
                         KeybindWindow.Parent = Library.Holder.Instance
@@ -1769,6 +1799,12 @@ do --// UI Source
                 end
 
                 function Keybind:SetMode()
+                    if Keybind.LastMode == "Always" and Keybind.Mode ~= "Always" then
+                        Keybind.Toggled = false
+                    end
+
+                    Keybind.LastMode = Keybind.Mode
+
                     Flags[Keybind.Flag] = Library:KeyFlag({
                         Mode = Keybind.Mode,
                         Key = Keybind.Key,
