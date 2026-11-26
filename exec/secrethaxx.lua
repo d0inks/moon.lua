@@ -1786,7 +1786,7 @@ do --// UI Source
                 local Update = function()
                     if KeybindObject then
                         KeybindObject:Set(Data.Name, Keybind.Mode)
-                        KeybindObject:SetStatus(Keybind.Toggled)
+                        KeybindObject:SetStatus(Keybind.Toggled and not (Data.Toggle and not Data.Toggle.Value))
 
                         if Keybind.Mode == "Hold" then
                             KeybindObject:SetMode(Keybind.Toggled and "holding" or "off")
@@ -1796,6 +1796,10 @@ do --// UI Source
                             KeybindObject:SetMode(Keybind.Toggled and "toggled" or "off")
                         end
                     end
+                end
+
+                if Data.Toggle then
+                    Data.Toggle.KeybindUpdate = Update
                 end
 
                 function Keybind:SetMode()
@@ -4550,6 +4554,9 @@ do --// UI Source
                     end
 
                     Flags[Toggle.Flag] = Bool
+                    if Toggle.KeybindUpdate then
+                        Toggle.KeybindUpdate()
+                    end
                     Library:SafeCall(Toggle.Callback, Bool)
                     Library:UpdateDependencies()
                 end
