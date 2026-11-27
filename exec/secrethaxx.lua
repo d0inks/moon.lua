@@ -5720,6 +5720,597 @@ do --// UI Source
                 return setmetatable(Textbox, Library)
             end
 
+            Library.PriorityColors = {
+                Friendly = Color3.fromRGB(110, 220, 130),
+                Enemy = Color3.fromRGB(235, 95, 95)
+            }
+
+            Library.PriorityFlag = "playerpriorities"
+
+            Library.GetPriority = function(Self, Player)
+                local Map = Flags[Library.PriorityFlag]
+                local Value = Map and Player and Map[tostring(Player.UserId)]
+
+                if Value == "Friendly" or Value == "Enemy" then
+                    return Value
+                end
+
+                return "Neutral"
+            end
+
+            Library.PlayerList = function(Self, Params)
+                Params = Params or { }
+
+                local UDim2New, UDimNew, TableInsert, TableSort, TableFind, MathMin = UDim2.new, UDim.new, table.insert, table.sort, table.find, math.min
+
+                local Flag = Params.Flag or Params.flag or "playerpriorities"
+                local SearchFlag = Flag .. "_search"
+                local DropFlag = Flag .. "_priority"
+                local Callback = Params.Callback or Params.callback or function() end
+                local ButtonList = Params.Buttons or Params.buttons or { }
+                local MaxRows = Params.MaxRows or Params.maxrows or 100
+                local RowHeight = 16
+                local BottomHeight = #ButtonList > 0 and 108 or 86
+
+                Library.PriorityFlag = Flag
+
+                if type(Flags[Flag]) ~= "table" then
+                    Flags[Flag] = { }
+                end
+
+                local PlayerList = {
+                    Players = { },
+                    Selected = nil,
+                    Query = "",
+                    Silent = false
+                }
+
+                local Rows = { }
+                local Thumbnails = { }
+                local Scroll, Avatar, PriorityDropdown
+                local InfoLabels = { }
+
+                local Page = Self:Page({Name = Params.Name or Params.name or "players"})
+                Page.Items["LeftColumn"].Instance.Visible = false
+                Page.Items["RightColumn"].Instance.Visible = false
+
+                local Host = setmetatable({Window = Self, Page = Page, Items = { }}, Library)
+
+                local Create = function(Class, Properties, Theme)
+                    Properties.Name = "\0"
+                    local Object = Library:Create(Class, Properties)
+
+                    if Theme then
+                        Object:AddToTheme(Theme)
+                    end
+
+                    return Object
+                end
+
+                local Stroked = function(Object)
+                    Create("UIStroke", {
+                        Parent = Object.Instance,
+                        ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                        LineJoinMode = Enum.LineJoinMode.Miter,
+                        Color = Library.Theme["Outline 1"]
+                    }, {Color = "Outline 1"})
+
+                    Create("UIStroke", {
+                        Parent = Object.Instance,
+                        ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+                        LineJoinMode = Enum.LineJoinMode.Miter,
+                        Color = Library.Theme["Outline 3"],
+                        BorderOffset = UDimNew(0, 1)
+                    }, {Color = "Outline 3"})
+                end
+
+                local Label = function(Parent, Text, Token, Properties)
+                    Properties.Parent = Parent.Instance
+                    Properties.FontFace = Properties.FontFace or Library.Font
+                    Properties.TextSize = Library.FontSize
+                    Properties.TextColor3 = Library.Theme[Token]
+                    Properties.Text = Text
+                    Properties.BackgroundTransparency = 1
+                    Properties.BorderSizePixel = 0
+
+                    local Object = Create("TextLabel", Properties, {TextColor3 = Token})
+                    Create("UIStroke", {Parent = Object.Instance})
+                    return Object
+                end
+
+                local Panel = function(Parent, Title, Properties)
+                    Properties.Parent = Parent.Instance
+                    Properties.BorderSizePixel = 0
+                    Properties.BackgroundColor3 = Library.Theme["Inline"]
+
+                    local Object = Create("Frame", Properties, {BackgroundColor3 = "Inline"})
+                    Stroked(Object)
+
+                    if Title then
+                        Label(Object, Title, "Text", {
+                            FontFace = Library.BoldFont,
+                            Size = UDim2New(0, 0, 0, 12),
+                            Position = UDim2New(0, 5, 0, 6),
+                            AutomaticSize = Enum.AutomaticSize.X
+                        })
+                    end
+
+                    return Object
+                end
+
+                local Columns = function(Parent, Texts, Token, Font)
+                    local Name = Label(Parent, Texts[1], Token, {
+                        FontFace = Font,
+                        AnchorPoint = Vector2.new(0, 0.5),
+                        Position = UDim2New(0, 2, 0.5, 0),
+                        Size = UDim2New(0.36, -2, 0, 12),
+                        TextXAlignment = Enum.TextXAlignment.Left,
+                        TextTruncate = Enum.TextTruncate.AtEnd
+                    })
+
+                    local Id = Label(Parent, Texts[2], Token, {
+                        FontFace = Font,
+                        AnchorPoint = Vector2.new(0, 0.5),
+                        Position = UDim2New(0.36, 0, 0.5, 0),
+                        Size = UDim2New(0.3, 0, 0, 12),
+                        TextXAlignment = Enum.TextXAlignment.Center
+                    })
+
+                    local Priority = Label(Parent, Texts[3], Token, {
+                        FontFace = Font,
+                        AnchorPoint = Vector2.new(0, 0.5),
+                        Position = UDim2New(0.66, 0, 0.5, 0),
+                        Size = UDim2New(0.34, -2, 0, 12),
+                        TextXAlignment = Enum.TextXAlignment.Center
+                    })
+
+                    return Name, Id, Priority
+                end
+
+                local PaintRow = function(Row)
+                    local Token = (Row.Player and Row.Player == PlayerList.Selected) and "Accent" or (Row.Hover and "Text" or "Inactive Text")
+
+                    for _, Object in {Row.Name, Row.Id} do
+                        Object:ChangeItemTheme({TextColor3 = Token})
+                        Object:Tween({TextColor3 = Library.Theme[Token]})
+                    end
+                end
+
+                local PaintPriority = function(Row)
+                    local Player = Row.Player
+                    local Object = Row.Priority
+
+                    if Player == LocalPlayer then
+                        Object.Instance.Text = "localplayer"
+                        Object:ChangeItemTheme({TextColor3 = "Inactive Text"})
+                        Object.Instance.TextColor3 = Library.Theme["Inactive Text"]
+                        return
+                    end
+
+                    local Priority = Library:GetPriority(Player)
+                    Object.Instance.Text = string.lower(Priority)
+
+                    if Priority == "Neutral" then
+                        Object:ChangeItemTheme({TextColor3 = "Inactive Text"})
+                        Object.Instance.TextColor3 = Library.Theme["Inactive Text"]
+                    else
+                        Object:ChangeItemTheme({TextColor3 = function()
+                            return Library.PriorityColors[Priority]
+                        end})
+                        Object.Instance.TextColor3 = Library.PriorityColors[Priority]
+                    end
+                end
+
+                local Matches = function(Player)
+                    if PlayerList.Query == "" then
+                        return true
+                    end
+
+                    return string.find(string.lower(Player.Name), PlayerList.Query, 1, true) ~= nil or string.find(string.lower(Player.DisplayName), PlayerList.Query, 1, true) ~= nil
+                end
+
+                local NewRow = function()
+                    local Row = {Hover = false}
+
+                    Row.Button = Create("TextButton", {
+                        Parent = Scroll.Instance,
+                        FontFace = Library.Font,
+                        TextSize = Library.FontSize,
+                        Text = "",
+                        AutoButtonColor = false,
+                        BackgroundTransparency = 1,
+                        BorderSizePixel = 0,
+                        Size = UDim2New(1, 0, 0, RowHeight),
+                        Visible = false
+                    })
+
+                    Row.Name, Row.Id, Row.Priority = Columns(Row.Button, {"", "", ""}, "Inactive Text", Library.Font)
+
+                    Row.Button:OnHover(function()
+                        Row.Hover = true
+                        PaintRow(Row)
+                    end, function()
+                        Row.Hover = false
+                        PaintRow(Row)
+                    end)
+
+                    Row.Button:Connect("MouseButton1Down", function()
+                        if Row.Player then
+                            PlayerList:Select(Row.Player)
+                        end
+                    end)
+
+                    TableInsert(Rows, Row)
+                    return Row
+                end
+
+                function PlayerList:Render()
+                    if not Scroll then
+                        return
+                    end
+
+                    local Shown = { }
+
+                    for _, Player in PlayerList.Players do
+                        if Matches(Player) then
+                            TableInsert(Shown, Player)
+                        end
+                    end
+
+                    TableSort(Shown, function(A, B)
+                        if (A == LocalPlayer) ~= (B == LocalPlayer) then
+                            return A == LocalPlayer
+                        end
+
+                        return string.lower(A.Name) < string.lower(B.Name)
+                    end)
+
+                    local Count = MathMin(#Shown, MaxRows)
+
+                    for Index = 1, Count do
+                        local Row = Rows[Index] or NewRow()
+                        local Player = Shown[Index]
+
+                        Row.Player = Player
+                        Row.Name.Instance.Text = Player.Name
+                        Row.Id.Instance.Text = tostring(Player.UserId)
+                        Row.Button.Instance.LayoutOrder = Index
+                        Row.Button.Instance.Visible = true
+                        PaintRow(Row)
+                        PaintPriority(Row)
+                    end
+
+                    for Index = Count + 1, #Rows do
+                        Rows[Index].Player = nil
+                        Rows[Index].Hover = false
+                        Rows[Index].Button.Instance.Visible = false
+                    end
+                end
+
+                function PlayerList:LoadAvatar(Player)
+                    if not Player then
+                        Avatar.Instance.Image = ""
+                        return
+                    end
+
+                    local Cached = Thumbnails[Player.UserId]
+
+                    if Cached then
+                        Avatar.Instance.Image = Cached
+                        return
+                    end
+
+                    Avatar.Instance.Image = ""
+
+                    task.spawn(function()
+                        local Success, Content = pcall(Players.GetUserThumbnailAsync, Players, Player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
+
+                        if not Library or Library.Unloaded or not Success then
+                            return
+                        end
+
+                        Thumbnails[Player.UserId] = Content
+
+                        if PlayerList.Selected == Player then
+                            Avatar.Instance.Image = Content
+                        end
+                    end)
+                end
+
+                function PlayerList:Select(Player)
+                    PlayerList.Selected = Player
+
+                    InfoLabels[1].Instance.Text = "name: " .. (Player and Player.Name or "???")
+                    InfoLabels[2].Instance.Text = "displayname: " .. (Player and Player.DisplayName or "???")
+                    InfoLabels[3].Instance.Text = "userid: " .. (Player and tostring(Player.UserId) or "???")
+
+                    PlayerList.Silent = true
+
+                    if Player then
+                        PriorityDropdown:Set(Player == LocalPlayer and "Neutral" or Library:GetPriority(Player))
+                    else
+                        PriorityDropdown.Items["Value"].Instance.Text = "..."
+                    end
+
+                    PlayerList.Silent = false
+
+                    for _, Row in Rows do
+                        PaintRow(Row)
+                    end
+
+                    PlayerList:LoadAvatar(Player)
+                end
+
+                function PlayerList:SetPriority(Player, Priority)
+                    if Player == LocalPlayer or (Priority ~= "Friendly" and Priority ~= "Enemy" and Priority ~= "Neutral") then
+                        return
+                    end
+
+                    if type(Flags[Flag]) ~= "table" then
+                        Flags[Flag] = { }
+                    end
+
+                    Flags[Flag][tostring(Player.UserId)] = Priority ~= "Neutral" and Priority or nil
+
+                    PlayerList:Render()
+                    Library:SafeCall(Callback, Player, Priority)
+                end
+
+                function PlayerList:Add(Player)
+                    if TableFind(PlayerList.Players, Player) then
+                        return
+                    end
+
+                    TableInsert(PlayerList.Players, Player)
+                    PlayerList:Render()
+                end
+
+                function PlayerList:Remove(Player)
+                    local Index = TableFind(PlayerList.Players, Player)
+
+                    if not Index then
+                        return
+                    end
+
+                    table.remove(PlayerList.Players, Index)
+
+                    if PlayerList.Selected == Player then
+                        PlayerList:Select(nil)
+                    end
+
+                    PlayerList:Render()
+                end
+
+                function PlayerList:Refresh()
+                    table.clear(PlayerList.Players)
+
+                    for _, Player in Players:GetPlayers() do
+                        TableInsert(PlayerList.Players, Player)
+                    end
+
+                    if PlayerList.Selected and not TableFind(PlayerList.Players, PlayerList.Selected) then
+                        PlayerList:Select(nil)
+                    end
+
+                    PlayerList:Render()
+                end
+
+                local Root = Create("Frame", {
+                    Parent = Page.Items["Page"].Instance,
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    Size = UDim2New(1, 0, 1, 0)
+                })
+
+                Create("UIPadding", {
+                    Parent = Root.Instance,
+                    PaddingTop = UDimNew(0, 6),
+                    PaddingBottom = UDimNew(0, 6),
+                    PaddingRight = UDimNew(0, 6),
+                    PaddingLeft = UDimNew(0, 6)
+                })
+
+                local SearchWrap = Create("Frame", {
+                    Parent = Root.Instance,
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    Size = UDim2New(1, -66, 0, 20)
+                })
+
+                local RefreshWrap = Create("Frame", {
+                    Parent = Root.Instance,
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    Position = UDim2New(1, -62, 0, 2),
+                    Size = UDim2New(0, 62, 0, 18)
+                })
+
+                local ListBox = Panel(Root, nil, {
+                    Position = UDim2New(0, 0, 0, 26),
+                    Size = UDim2New(1, 0, 1, -(26 + 6 + BottomHeight))
+                })
+
+                local HeaderRow = Create("Frame", {
+                    Parent = ListBox.Instance,
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    Position = UDim2New(0, 4, 0, 6),
+                    Size = UDim2New(1, -8, 0, 12)
+                })
+
+                Columns(HeaderRow, {"name", "userid", "priority"}, "Text", Library.BoldFont)
+
+                Create("Frame", {
+                    Parent = ListBox.Instance,
+                    BorderSizePixel = 0,
+                    Position = UDim2New(0, 4, 0, 22),
+                    Size = UDim2New(1, -8, 0, 1),
+                    BackgroundColor3 = Library.Theme["Outline 1"]
+                }, {BackgroundColor3 = "Outline 1"})
+
+                Scroll = Create("ScrollingFrame", {
+                    Parent = ListBox.Instance,
+                    Active = true,
+                    AutomaticCanvasSize = Enum.AutomaticSize.Y,
+                    ScrollingDirection = Enum.ScrollingDirection.Y,
+                    ScrollBarThickness = 0,
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    CanvasSize = UDim2New(0, 0, 0, 0),
+                    Position = UDim2New(0, 4, 0, 26),
+                    Size = UDim2New(1, -8, 1, -30)
+                })
+
+                Create("UIListLayout", {
+                    Parent = Scroll.Instance,
+                    Padding = UDimNew(0, 0),
+                    SortOrder = Enum.SortOrder.LayoutOrder
+                })
+
+                local Bottom = Panel(Root, "selected", {
+                    AnchorPoint = Vector2.new(0, 1),
+                    Position = UDim2New(0, 0, 1, 0),
+                    Size = UDim2New(1, 0, 0, BottomHeight)
+                })
+
+                Avatar = Create("ImageLabel", {
+                    Parent = Bottom.Instance,
+                    Position = UDim2New(0, 6, 0, 26),
+                    Size = UDim2New(0, 54, 0, 54),
+                    BorderSizePixel = 0,
+                    ScaleType = Enum.ScaleType.Fit,
+                    BackgroundColor3 = Library.Theme["Content"]
+                }, {BackgroundColor3 = "Content"})
+
+                Stroked(Avatar)
+
+                for Index, Text in {"name: ???", "displayname: ???", "userid: ???"} do
+                    InfoLabels[Index] = Label(Bottom, Text, "Text", {
+                        Position = UDim2New(0, 70, 0, 26 + (Index - 1) * 16),
+                        Size = UDim2New(1, -236, 0, 12),
+                        TextXAlignment = Enum.TextXAlignment.Left,
+                        TextTruncate = Enum.TextTruncate.AtEnd
+                    })
+                end
+
+                local DropWrap = Create("Frame", {
+                    Parent = Bottom.Instance,
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    Position = UDim2New(1, -160, 0, 24),
+                    Size = UDim2New(0, 156, 0, 35)
+                })
+
+                Host:Textbox({
+                    Name = "search",
+                    Flag = SearchFlag,
+                    Placeholder = "search here",
+                    Parent = SearchWrap,
+                    Callback = function(Value)
+                        Flags[SearchFlag] = nil
+                        PlayerList.Query = string.lower(Value)
+                        PlayerList:Render()
+                    end
+                })
+
+                Host:Button({
+                    Name = "refresh",
+                    Parent = RefreshWrap,
+                    Callback = function()
+                        PlayerList:Refresh()
+                    end
+                })
+
+                PriorityDropdown = Host:Dropdown({
+                    Name = "priority",
+                    Flag = DropFlag,
+                    Items = {"Friendly", "Enemy", "Neutral"},
+                    Parent = DropWrap,
+                    Callback = function(Value)
+                        Flags[DropFlag] = nil
+
+                        if PlayerList.Silent or type(Value) ~= "string" then
+                            return
+                        end
+
+                        if PlayerList.Selected then
+                            PlayerList:SetPriority(PlayerList.Selected, Value)
+                        end
+                    end
+                })
+
+                SetFlags[SearchFlag] = nil
+                SetFlags[DropFlag] = nil
+                Flags[SearchFlag] = nil
+                Flags[DropFlag] = nil
+
+                if #ButtonList > 0 then
+                    local ButtonRow = Create("Frame", {
+                        Parent = Bottom.Instance,
+                        BackgroundTransparency = 1,
+                        BorderSizePixel = 0,
+                        Position = UDim2New(0, 4, 0, 84),
+                        Size = UDim2New(1, -8, 0, 18)
+                    })
+
+                    Create("UIListLayout", {
+                        Parent = ButtonRow.Instance,
+                        FillDirection = Enum.FillDirection.Horizontal,
+                        Padding = UDimNew(0, 4),
+                        SortOrder = Enum.SortOrder.LayoutOrder
+                    })
+
+                    local Count = #ButtonList
+
+                    for Index, Data in ButtonList do
+                        local Wrap = Create("Frame", {
+                            Parent = ButtonRow.Instance,
+                            BackgroundTransparency = 1,
+                            BorderSizePixel = 0,
+                            LayoutOrder = Index,
+                            Size = UDim2New(1 / Count, -(4 * (Count - 1) // Count), 0, 18)
+                        })
+
+                        local ButtonCallback = Data.Callback or Data.callback or Data[2] or function() end
+
+                        Host:Button({
+                            Name = Data.Name or Data.name or Data[1] or "button",
+                            Parent = Wrap,
+                            Callback = function()
+                                if PlayerList.Selected then
+                                    Library:SafeCall(ButtonCallback, PlayerList.Selected)
+                                end
+                            end
+                        })
+                    end
+                end
+
+                SetFlags[Flag] = function(Value)
+                    Flags[Flag] = type(Value) == "table" and Value or { }
+                    PlayerList:Render()
+
+                    if PlayerList.Selected then
+                        PlayerList:Select(PlayerList.Selected)
+                    end
+                end
+
+                for _, Player in Players:GetPlayers() do
+                    TableInsert(PlayerList.Players, Player)
+                end
+
+                Library:Connect(Players.PlayerAdded, function(Player)
+                    PlayerList:Add(Player)
+                end)
+
+                Library:Connect(Players.PlayerRemoving, function(Player)
+                    PlayerList:Remove(Player)
+                end)
+
+                PlayerList.Page = Page
+                PlayerList:Render()
+                return PlayerList
+            end
+
             Library.InitWindow = function(Self)
                 local SettingsPage = Self:Page({Name = "settings"}) do
                     local ConfigsSection = SettingsPage:Section({Name = "configs", Side = 2}) do
